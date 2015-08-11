@@ -24,3 +24,4 @@ python setup.py --help-commands
 Or look [here](http://docs.python.org/2/install/) for more details.
 # c2ray-tools
 # c2raytools
+# c2ray-tools
