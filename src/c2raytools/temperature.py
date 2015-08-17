@@ -25,11 +25,11 @@ def calc_dt(xfrac, dens, z = -1):
 	rho = rho.astype('float64')
 	
 	if z < 0:
-		z = determine_redshift_from_filename(xfrac)
-		if z < 0:
-			z = determine_redshift_from_filename(dens)
-		if z < 0:
-			raise Exception('No redshift specified. Could not determine from file.')
+                z = determine_redshift_from_filename(xfrac)
+                if z < 0:
+		    z = determine_redshift_from_filename(dens)
+                    if z < 0:
+		        raise Exception('No redshift specified. Could not determine from file.')
 	
 	print_msg('Making dT box for z=%f' % z)
 	
@@ -53,25 +53,25 @@ def calc_dt_full(xfrac, temp, dens, z = -1):
 	'''
 
 	xi, xi_type = get_data_and_type(xfrac)
-    Ts, Ts_type = get_data_and_type(temp)
+        Ts, Ts_type = get_data_and_type(temp)
 	rho, rho_type = get_data_and_type(dens)
 	xi = xi.astype('float64')
-    Ts = Ts.astype('float64')
+        Ts = Ts.astype('float64')
 	rho = rho.astype('float64')
 	
 	if z < 0:
 		z = determine_redshift_from_filename(xfrac)
 		if z < 0:
 			z = determine_redshift_from_filename(dens)
-            if z < 0:
-                z=determine_redshift_from_filename(temp)
-		if z < 0:
-			raise Exception('No redshift specified. Could not determine from file.')
+                        if z < 0:
+                		z=determine_redshift_from_filename(temp)
+				if z < 0:
+					raise Exception('No redshift specified. Could not determine from file.')
 	
 	print_msg('Making full dT box for z=%f' % z)
 	
 	#Calculate dT
-	return _dt(rho, Ts, xi, z)
+	return _dt_full(rho, Ts, xi, z)
 
 def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
 	'''
@@ -131,7 +131,7 @@ def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2):
 		xfrac = read_cbin(xfrac)
 	except Exception:
 		pass
-    try:
+        try:
 		temp = read_cbin(temp)
 	except Exception:
 		pass
@@ -177,7 +177,7 @@ def _dt(rho, xi, z):
 def _dt_full(rho, Ts, xi, z):
 		
 	rho_mean = const.rho_crit_0*const.OmegaB
-    Tcmb = 2.725*(1+z) # might want to add to cosmology.py instead
+        Tcmb = 2.725*(1+z) # might want to add to cosmology.py instead
 	Cdt = mean_dt(z)
 	dt = (1+Tcmb/Ts)*Cdt*(1.0-xi)*rho/rho_mean
 	
