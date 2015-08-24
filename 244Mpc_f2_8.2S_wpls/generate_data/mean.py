@@ -25,7 +25,7 @@ def mean_temp():
         data = c2t.TemperFile(filename)
         file.write(str(np.mean(data.temper)) + '\n')
     file.close()
-    return "Done"
+    print "Done"
 
 def mean_xfrac(id):
     file = open('data/mean_xfrac'+id+'.dat', 'w')
@@ -36,9 +36,4 @@ def mean_xfrac(id):
         xfile = c2t.XfracFile(xfrac_filename)
         file.write(str(np.mean(xfile.xi)) + '\n') 
     file.close()
-    return "Done"
-
-#print mean_temp()
-#print mean_xfrac('')
-#print mean_xfrac('He1')
-#print mean_xfrac('He2')
+    print "Done"

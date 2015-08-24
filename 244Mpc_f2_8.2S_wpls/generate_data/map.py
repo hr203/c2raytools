@@ -7,9 +7,12 @@ http://ttt.astro.su.se/~hjens/c2raytools/
 
 import numpy as np
 import pylab as pl
+#import IO
 import sys
 sys.path.append('../')
 import redshifts as rs
+sys.path.append('../')
+import IO
 sys.path.append('../../src/')
 import c2raytools as c2t
 
@@ -21,30 +24,21 @@ c2t.set_sim_constants(boxsize_cMpc = 244)
 
 base_path = '/lustre/scratch/astro/hr203/RESULTS/'
 
-def printf(data,filename):
-    file = open(filename, 'w')
-    l = len(data[:,1,1])      
-    for i in range(l):
-        for j in range(l):
-            for k in range(l):
-                file.write(str(data[i,j,k])+'\n')
-    file.close()
-
 def map_temp():
     for i in range(len(redshifts)):
         filename = 'data/map_temper_'+str('%.3f' % redshifts[i])+'.dat'
         temp_filename = base_path + '/244Mpc_f2_8.2S_H250_wpls/Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
         tfile = c2t.TemperFile(temp_filename)
-        printf(tfile.temper,filename)
-    return "Done"
+        IO.writemap(tfile.temper,filename)
+    print "Done"
 
 def map_xfrac(id):
     for i in range(len(redshifts)):
         filename = 'data/map_xfrac'+id+'_'+str('%.3f' % redshifts[i])+'.dat'
         xfrac_filename = base_path + '/244Mpc_f2_8.2S_H250_wpls/xfrac3d'+id+'_'+str('%.3f' % redshifts[i]) + '.bin'
         xfile = c2t.XfracFile(xfrac_filename)
-        printf(xfile.xi,filename)
-    return "Done"
+        IO.writemap(xfile.xi,filename)
+    print "Done"
 
 def map_dbt():
     for i in range(len(redshifts)):
@@ -66,12 +60,7 @@ def map_dbt():
 
         dT_box = c2t.calc_dt_full(xfile, tfile, dfile, redshifts[i])
 
-        printf(dT_box,filename)
-    return "Done"
-#    return dT_box
+        IO.writemap(dT_box,filename)
+    print "Done"
 
-#print mean_temp()
-#print mean_xfrac('')
-#print mean_xfrac('He1')
-#print mean_xfrac('He2')
-#prinf(map_dbt)
+print map_temp()
