@@ -27,9 +27,18 @@ def plotmap():
 
 def histogram():
     '''plot hisograms'''
-    for i in range(len(redshifts)-3):
-        data = IO.readoned("map_temper_"+str('%.3f' % redshifts[i]))
-        plot_1D.plot_histogram(data,"Temperature, Redshift:" +str('%.3f' % redshifts[i]),"loghist_temper_"+str(i+10)+'_'+str('%.3f' % redshifts[i]),"Temperature(K)",nobins=200) 
+    for i in range(1,len(redshifts)-3):
+     #   data = IO.readoned("map_dbt_"+str('%.3f' % redshifts[i]))
+     #   plot_1D.plot_histogram(data,"Differential Brightness Temperature, Redshift:" +str('%.3f' % redshifts[i]),"loghist_dbt_"+str(i+10)+'_'+str('%.3f' % redshifts[i]),"Differential Brightness Temperature(K)",type='lin') 
+
+        xfrac = IO.readoned("map_xfrac_"+str('%.3f' % redshifts[i]))
+        xfracHe1 = IO.readoned("map_xfracHe1_"+str('%.3f' % redshifts[i]))
+        xfracHe2 = IO.readoned("map_xfracHe2_"+str('%.3f' % redshifts[i]))
+        plot_1D.plot_histogram3(xfrac,xfracHe1,xfracHe2,"Ionised Fraction, Redshift:" +str('%.3f' % redshifts[i]),"loghist_xfrac_"+str(i+10)+'_'+str('%.3f' % redshifts[i]),"Ionised Fraction")
+
+        #data = IO.readoned("map_temper_"+str('%.3f' % redshifts[i]))
+        #plot_1D.plot_histogram(data,"Temperature, Redshift:" +str('%.3f' % redshifts[i]),"loghist_temper_shortrange_"+str(i+10)+'_'+str('%.3f' % redshifts[i]),"Temperature(K)")
+
 
 #create powerspectra datafile from dbt
 #for i in range(len(redshifts)):

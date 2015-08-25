@@ -75,9 +75,9 @@ def plot_histogram(data,title,name,xlabel,nobins=5000,type='log'):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     if (type=='log'):
-        ax.hist(np.log10(data),bins=10**np.linspace(0, 1, nobins),color='red',alpha=0.3) 
+        ax.hist(np.log10(data),bins=10**np.linspace(-1, 0.6, nobins),color='red',alpha=0.1) 
     else:
-        ax.hist(data,nobins,color='green',alpha=0.3)
+        ax.hist(data,nobins,color='green',alpha=0.1)
     plt.title(title)
     if type=='log':
         plt.xlabel('log10('+xlabel+')')
@@ -88,6 +88,29 @@ def plot_histogram(data,title,name,xlabel,nobins=5000,type='log'):
     plt.close()
     print "histogram complete"
 #plot_mean(mean("temp"),"Tempererature","Temperature (K)")
+
+def plot_histogram3(data,data2,data3,title,name,xlabel,nobins=5000,type='log'):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    if (type=='log'):
+        ax.hist(np.log10(data3),histtype='stepfilled',bins=np.linspace(-16, 0, nobins),color='green',edgecolor='none',label='HeIII')
+        ax.hist(np.log10(data2),histtype='stepfilled',bins=np.linspace(-16,0,nobins),color='blue',edgecolor='none',label='HeII')
+  #      ax.hist(np.log10(data3),histtype='stepfilled',bins=np.linspace(-16,0,nobins),color='green',alpha=0.01,label='HeIII')
+        ax.hist(np.log10(data),histtype='stepfilled',bins=np.linspace(-16,0,nobins),color='red',edgecolor='none',label='HII')
+    else:
+        ax.hist(data,nobins,color='red',alpha=0.01)
+        ax.hist(data,nobins,color='green',alpha=0.01)
+    plt.title(title)
+    plt.legend()
+    if type=='log':
+        plt.xlabel('log10('+xlabel+')')
+    else:
+        plt.xlabel(xlabel)
+    plt.ylabel("Frequency")
+    plt.savefig("plots/"+name+".png")
+    plt.close()
+    print "histogram complete"
+
 
 #means = np.zeros(len(redshifts)*3).reshape(len(redshifts),3)
 #means[:,0] = mean('xfrac')
