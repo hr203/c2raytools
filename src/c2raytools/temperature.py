@@ -71,7 +71,7 @@ def calc_dt_full(xfrac, temp, dens, z = -1):
 	print_msg('Making full dT box for z=%f' % z)
 	
 	#Calculate dT
-	return _dt_full(rho, Ts, xi, z)
+	return _dt_full(dens,xfrac,temp,z)#rho, Ts, xi, z)
 
 def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
 	'''
@@ -174,12 +174,13 @@ def _dt(rho, xi, z):
 	
 	return dt
 
-def _dt_full(rho, Ts, xi, z):
+def _dt_full(rho, xi, Ts, z):
 		
 	rho_mean = const.rho_crit_0*const.OmegaB
         Tcmb = 2.725*(1+z) # might want to add to cosmology.py instead
 	Cdt = mean_dt(z)
-	dt = (1+Tcmb/Ts)*Cdt*(1.0-xi)*rho/rho_mean
+        dt = ((Ts.temper-Tcmb)/Ts.temper)*Cdt*(1.0-xi.xi)*rho.cgs_density/rho_mean  #extra term for temperature fluctuations as Ts is not much greater than Tcmb, Hannah Ross
+#	dt = (1+Tcmb/Ts)*Cdt*(1.0-xi)*rho/rho_mean
 	
 	return dt
 	
