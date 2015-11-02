@@ -1,0 +1,22 @@
+#!/bin/sh
+#$ -N job_plots  
+#$ -M  hr203@sussex.ac.uk 
+#$ -m bea
+#$ -cwd
+#$ -pe openmpi 1
+
+#$ -q parallel.q
+## this hardware is not really suitable for MPI
+##$ -q mps.q@@compute_amd 
+##$ -q mps.q@@compute_intel
+
+#$ -S /bin/bash
+# source modules environment:
+module load python
+#source /lustre/scratch/astro/ds381/yt-x86_64/bin/activate
+
+#module add sge #for submitting jobs
+#module load intel
+#module load mvapich2/intel/64/1.9
+
+python script.py
