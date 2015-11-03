@@ -1,5 +1,6 @@
 import numpy as np
 import pylab as pl
+import setup_dirs 
 #import redshifts as rs
 import sys
 
@@ -35,9 +36,10 @@ def write2data(data,data2,filename,filename2):
     print "Written to " + str(filename)
 
 
-def readmap(name):
+def readmap(name,resultdir=setup_dirs.resultsdir()):
     map = np.zeros(mesh**3).reshape(mesh,mesh,mesh)
-    file = open('../generate_data/data/map_'+name+'.dat', 'r')
+    #if 
+    file = open('../generate_data/'+resultdir+'map_'+name+'.dat', 'r')
     c=0
     for line in file:
         x = int((c)/(mesh**2))
@@ -49,29 +51,29 @@ def readmap(name):
         #if (True):
         #    print x+1,y+1,z+1
     #print map
-    print 'Read map from ../generate_data/data/map_'+name+'.dat'
+    print 'Read map from ../generate_data/'+setup_dirs.resultsdir()+'map_'+name+'.dat'
     return map
 
 def readoned(name):
-    file = open('../generate_data/data/'+name+'.dat','r')
+    file = open('../generate_data/'+setup_dirs.resultsdir()+name+'.dat','r')
     cnt=0
     for line in file:
         cnt = cnt+1
     data=np.zeros(cnt)
     file.close()
-    file = open('../generate_data/data/'+name+'.dat','r')
+    file = open('../generate_data/'+setup_dirs.resultsdir()+name+'.dat','r')
     c=-1
     for line in file:
         if (c!=-1):
             data[c] = float(line)
         c=c+1
     file.close()
-    print 'read data from ../generate_data/data/'+name+'.dat'
+    print 'read data from ../generate_data/'+setup_dirs.resultsdir()+name+'.dat'
     return data
 
 
 def writemap(data,filename):
-    print data
+#    print data
     file = open(filename, 'w')
     l = len(data[:,1,1])
     for i in range(l):

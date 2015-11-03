@@ -1,4 +1,7 @@
 import numpy
+import paths
+
+
 
 def read_redshifts(file):
 

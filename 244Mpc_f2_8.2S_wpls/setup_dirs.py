@@ -7,8 +7,10 @@ import numpy
 #FLAG = 'wquasars'  #for quasars only
 #FLAG = 'wquasars_wpls' #for both
 
-#sim redone on apollo
+#sims redone on apollo
 FLAG = 'wstars' #for neither
+#FLAG = 'wstars_equalphotons' #for neither
+#FLAG = 'compare_wstars_wpls'
 
 #kylsim
 #FLAG = 'kylsim'
@@ -31,9 +33,9 @@ def resultsdir():
 def plotsdir():
     return plots_dir
 
-def read_redshifts():
+def read_redshifts(flag = FLAG):
 
-    file = '../red_' + FLAG +'.dat'
+    file = '../red_' + flag +'.dat'
 
         
 #    if FLAG == 'wpls':
@@ -72,7 +74,7 @@ def read_redshifts():
 def nosteps():
     steps =2
     if FLAG == 'wpls_higheff':
-        steps=10
+        steps=40
     return steps
 
 #def get_dens_redshift(it):

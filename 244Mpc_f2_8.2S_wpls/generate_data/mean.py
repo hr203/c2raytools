@@ -9,31 +9,52 @@ import numpy as np
 import pylab as pl
 import sys
 sys.path.append('../')
-import redshifts as rs
+import setup_dirs
+#import redshifts as rs
 sys.path.append('../../src/')
 import c2raytools as c2t
+#sys.path.append('../')
+#import paths
 
-redshifts = rs.read_redshifts("../red_ori2.dat")
+redshifts = setup_dirs.read_redshifts()
 c2t.set_verbose(True)
 c2t.set_sim_constants(boxsize_cMpc = 244)
 
 def mean_temp():
-    file = open('data/mean_temp.dat', 'w')
-    base_path = '/lustre/scratch/astro/hr203/RESULTS/'
+    file = open(setup_dirs.resultsdir()+'mean_temp.dat', 'w')
     for i in range(len(redshifts)):
-        filename = base_path + '/244Mpc_f2_8.2S_H250_wpls/Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
+        filename = setup_dirs.path()+'Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
         data = c2t.TemperFile(filename)
         file.write(str(np.mean(data.temper)) + '\n')
     file.close()
-    print "Done"
+    print "Written mean Temperature to "+setup_dirs.resultsdir()+'mean_temp.dat'
 
 def mean_xfrac(id):
-    file = open('data/mean_xfrac'+id+'.dat', 'w')
-    base_path = '/lustre/scratch/astro/hr203/RESULTS/'
-
+    file = open(setup_dirs.resultsdir()+'mean_xfrac'+id+'.dat', 'w')
     for i in range(len(redshifts)):
-        xfrac_filename = base_path + '/244Mpc_f2_8.2S_H250_wpls/xfrac3d'+id+'_'+str('%.3f' % redshifts[i]) + '.bin'
+        xfrac_filename = setup_dirs.path()+'xfrac3d'+id+'_'+str('%.3f' % redshifts[i]) + '.bin'
         xfile = c2t.XfracFile(xfrac_filename)
         file.write(str(np.mean(xfile.xi)) + '\n') 
     file.close()
-    print "Done"
+    print "Written mean xfrac to "+setup_dirs.resultsdir()+'mean_xfrac'+id+'.dat'
+
+def mean_dbt():
+    file = open(setup_dirs.resultsdir()+'mean_dbt.dat','w')
+    print len(redshifts)
+    for i in range(len(redshifts)):
+        filename = setup_dirs.resultsdir()+'map_dbt_'+str('%.3f' % redshifts[i])+'.dat'
+        temp_filename = setup_dirs.path()+'Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
+        xfrac_filename = setup_dirs.path() +'xfrac3d_'+str('%.3f' % redshifts[i]) + '.bin'
+        if i%2==0:
+            density_filename='/research/prace/244Mpc_RT/244Mpc_f2_8.2pS_250/coarser_densities/' + str('%.3f' % redshifts[i]) + 'n_all.dat'
+        else:
+            density_filename='/research/prace/244Mpc_RT/244Mpc_f2_8.2pS_250/coarser_densities/' + str('%.3f' % redshifts[i-1]) + 'n_all.dat'
+        tfile = c2t.TemperFile(temp_filename)
+        xfile =  c2t.XfracFile(xfrac_filename)
+        dfile = c2t.DensityFile(density_filename)
+
+        dT_box = c2t.calc_dt_full(xfile, tfile, dfile, redshifts[i]) #returned in micro kelvin! update plots
+        file.write(str(np.mean(dT_box))+'\n')
+    print "Written mean dbt to " + setup_dirs.resultsdir()+'mean_dbt.dat'
+
+

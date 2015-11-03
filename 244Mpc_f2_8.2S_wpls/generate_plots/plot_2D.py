@@ -12,18 +12,18 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import MultipleLocator
-mpl.rc('xtick', labelsize=17) 
-mpl.rc('ytick', labelsize=17) 
+mpl.rc('xtick', labelsize=22) 
+mpl.rc('ytick', labelsize=22) 
 mpl.rc('font',family='serif')
-fontsize=18
-numberfontsize=17
+fontsize=24
+numberfontsize=22
 tickwidth=1.5
 
 redshifts = setup_dirs.read_redshifts()
 nosteps=setup_dirs.nosteps()
 
 
-start=53#49
+start=55#49
 mesh=250
 maxi = 0
 mini = 0
@@ -45,14 +45,9 @@ def findmax(data):
 
 def plot_scatter_contour(x,y,name,ylabel,xlabel,it,nbins=200):
     #plt.figure()
-    plt.figure(figsize=(9, 7.25), dpi= 300)
-#    plt.subplot2grid((1,1), (0,0), rowspan=1, colspan=1)
-
-#    mpl.rc('font',family='serif')
+    fig=plt.figure(figsize=(9, 7.25), dpi= 300)
     plt.subplot('111', axisbg='black')
     ax = plt.gca()
-#    ax.get_yaxis().set_tick_params(which='both', direction='out')
-#    ax.get_xaxis().set_tick_params(which='both', direction='out')    
     #general tick parameters
     ax.tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, direction='out',pad=14.0,top='off',right='off')
     ax.tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off')
@@ -68,14 +63,8 @@ def plot_scatter_contour(x,y,name,ylabel,xlabel,it,nbins=200):
     #x-axis
     m0 = MultipleLocator(1)
     ax.xaxis.set_major_locator(m0)
-    m0 = MultipleLocator(0.1)
+    m0 = MultipleLocator(0.2)
     ax.xaxis.set_minor_locator(m0)
-    
-    #turn irrelevant ticks off
-#    ax.tick_params(top="off")
-#    ax.tick_params(bottom="on")
-#    ax.tick_params(right="off")
-#    ax.tick_params(left="on")
 
     norm = 1.0
     if name =="equation_of_state":
@@ -93,8 +82,10 @@ def plot_scatter_contour(x,y,name,ylabel,xlabel,it,nbins=200):
 
 
     #plot data
-    plt.hist2d(x/norm, y, bins=nbins,norm=LogNorm())
-    plt.colorbar(orientation='vertical')
+    cax =plt.hist2d(x/norm, y, bins=nbins,norm=LogNorm(),normed=True,cmap='Blues_r')
+    cbar = plt.colorbar(orientation='vertical')
+    #cbar.set_ticks([maxi,maxi/10.0,maxi/100.0,maxi/1000.0,maxi/10000.0,maxi/1000000.0])
+    #cbar.set_ticklabels(['$10**0$','$10**{-1}$','$10**{-2}$','$10**{-3}$','$10**{-4}$','$10**{-5}$'])
     plt.ylabel(ylabel,size=fontsize)
     plt.ylim(0,25100)
     plt.xlabel(xlabel,size=fontsize)
