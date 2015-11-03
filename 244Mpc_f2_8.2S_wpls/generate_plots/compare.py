@@ -2,12 +2,31 @@ import numpy as np
 import plot_1D
 import plot_2D
 import sys
+
+from mpl_toolkits.axes_grid.anchored_artists import AnchoredText
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
+from matplotlib.ticker import MultipleLocator
+import matplotlib.gridspec as gridspec
+mpl.rc('xtick', labelsize=22)
+mpl.rc('ytick', labelsize=22)
+mpl.rc('font',family='serif')
+fontsize=22
+numberfontsize=22
+tickwidth=1.5
+
+
 sys.path.append('../')
 import setup_dirs
+import IO
+
+
 
 redshifts_wstars = setup_dirs.read_redshifts('wstars')
 redshifts_wpls = setup_dirs.read_redshifts('wpls')
-
+start=0
 def compare_mean_temp():
     wstars_temp = plot_1D.mean('temp','data_wstars/',redshifts_wstars)
     wpls_temp = plot_1D.mean('temp','data_wpls/',redshifts_wpls)
@@ -65,7 +84,7 @@ def compare_mean_xfrac():
    #print means[:,2], means[:,5]
     #print redshifts_wstars[i], redshifts_wpls[i]
 
-    plot_1D.plot_mean(means,"xfrac","Ionised Fraction (%)",'compare_wstars_wpls/',redshifts_wpls,"Stellar and X-ray binaries","Stellar only")
+    plot_1D.plot_mean(means,"xfrac","log$_{10}$ (Ionised Fraction)",'compare_wstars_wpls/',redshifts_wpls,"Stellar and X-ray binaries","Stellar only")
 
 def compare_hisograms_temperature():
     for i in range(12,len(redshifts)):
@@ -75,6 +94,97 @@ def compare_hisograms_temperature():
 #        plot.1D.plot_log_histogram(data,"Temperature, Redshift:" +str('%.3f' % redshifts[i]),"loghist_temper_shortrange_"+str(i+10)+'_'+str('%.3f' % redshifts[i]),"Temperature(K)")
 
 
-compare_mean_xfrac()
-compare_mean_dbt()
-compare_mean_temp()
+def compare_dbtmaps():
+    mini = -300
+    maxi=300
+    redshifts = [17.525,15.360,13.733]
+    mainfig = plt.figure()
+    mainfig.text(0.45,0.04,"Distance (Mpc)",ha='center',va='center')
+    mainfig.text(0.04,0.5,"Distance (Mpc)",ha='center',va='center',rotation='vertical')
+
+    fig, axes = plt.subplots(2,3,figsize=(12,6))
+#    plt.setp(axes[0,:],xticks=[])
+#    plt.setp(axes[:,1:3],yticks=[])
+    plt.subplots_adjust(left=None,bottom=None,right=None,top=None,wspace=0.05,hspace=0.02)
+    for i in range(len(redshifts)):#start,len(redshifts)):
+        print "Doing redshift " + str(redshifts[i])+"..."
+        dbt_wpls = IO.readmap("dbt_"+str('%.3f' % redshifts[i]),'data_wpls/')
+
+        
+       # ax=plt.subplot(gs1[i])
+       # plt.axis('on')
+        im = axes[1,i].imshow(dbt_wpls[250/2,:,:],cmap='gnuplot2',vmin=mini,vmax=maxi,origin='lower')
+        axes[0,i].text(20,220,"z = "+str(redshifts[i]),fontsize=fontsize,color='white')
+       # ax.set_xticklabels([])
+       # ax.set_yticklabels([])
+       # ax.set_aspect('equal')
+        #plt.subp
+
+        dbt_wstars= IO.readmap("dbt_"+str('%.3f' % redshifts[i]),'data_wstars/')
+       
+       # ax2=plt.subplot(gs1[i+3])
+       # plt.axis('on')
+
+        axes[0,i].imshow(dbt_wstars[250/2,:,:],cmap='gnuplot2',vmin=mini,vmax=maxi,origin='lower')
+        axes[0,i].text(20,220,"z = "+str(redshifts[i]),fontsize=fontsize,color='white')
+       # ax2.set_xticklabels([])
+       # ax2.set_yticklabels([])
+       # ax2.set_aspect('equal')
+        #plt.subp
+
+    #fig = plt.figure() 
+
+   # mainfig.text(0.45,0.04,"Distance (Mpc)",ha='center',va='center')
+   # mainfig.text(0.04,0.5,"Distance (Mpc)",ha='center',va='center',rotation='vertical')
+    fig.subplots_adjust(right=0.85)
+    cbar_ax = fig.add_axes([0.85, 0.1, 0.03, 0.35])
+    cbar = fig.colorbar(im, cax=cbar_ax)
+    cbar.set_label("$\delta T_b (mK)$",size=fontsize)
+    cbar_ax = fig.add_axes([0.85,0.6,0.03,0.35])
+    fig.colorbar(im,cax=cbar_ax)
+
+    cnv=250.0/244.0
+    for i in range(len(axes[:,0])):
+        for j in range(len(axes[0,:])):
+                axes[i,j].tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, direction='out',pad=14.0,top='off',right='off')
+                axes[i,j].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off')
+
+                axes[i,j].tick_locs=[0,100*cnv,200*cnv]
+                axes[i,j].tick_lbls=[0,100,200]
+                m0 = MultipleLocator(50)
+                axes[i,j].yaxis.set_major_locator(m0)
+                axes[i,j].xaxis.set_major_locator(m0)
+                m0 = MultipleLocator(10)
+                axes[i,j].yaxis.set_minor_locator(m0)
+                axes[i,j].xaxis.set_minor_locator(m0)
+
+#    axes[0,0].tick_locs=[0,50*cnv,100*cnv,150*cnv,200*cnv,250*cnv]
+#    axes[0,0].tick_lbls=[0,50,100,150,200,250]
+#    axes[0,1].tick_locs=[0,50*cnv,100*cnv,150*cnv,200*cnv,250*cnv]
+#    axes[0,1].tick_lbls=[0,50,100,150,200,250]
+
+
+
+    plt.setp(axes[0,:],xticks=[])
+    plt.setp(axes[:,1:3],yticks=[])
+
+##    plt.setp(axes[:,2],yticks=[])
+#    axes[0,1].set_xticks
+    
+
+#    f.subplots_adjust(right=0.8)
+#    cbar_ax = fig.add_axes([0.85,0.15,0.05,0.7])
+#    f.colorbar(im,cax=cbar_ax)
+#    cbar = fig=.colorbar(orientation='vertical')
+#    cbar.set_label("$\delta T_b$",size=fontsize)
+
+    #plt.tight_layout()
+    plt.savefig("compare_wstars_wpls/map_dbt.png")
+    plt.close()
+
+
+compare_dbtmaps()
+
+#compare_mean_xfrac()
+#compare_mean_dbt()
+#compare_mean_temp()
