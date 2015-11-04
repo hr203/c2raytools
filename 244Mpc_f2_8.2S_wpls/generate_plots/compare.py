@@ -10,11 +10,11 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import MultipleLocator
 import matplotlib.gridspec as gridspec
-mpl.rc('xtick', labelsize=22)
-mpl.rc('ytick', labelsize=22)
+mpl.rc('xtick', labelsize=20)
+mpl.rc('ytick', labelsize=20)
 mpl.rc('font',family='serif')
-fontsize=22
-numberfontsize=22
+fontsize=20
+numberfontsize=20
 tickwidth=1.5
 
 
@@ -86,6 +86,16 @@ def compare_mean_xfrac():
 
     plot_1D.plot_mean(means,"xfrac","log$_{10}$ (Ionised Fraction)",'compare_wstars_wpls/',redshifts_wpls,"Stellar and X-ray binaries","Stellar only")
 
+
+def mjfFormatter(x,pos):
+    conv=244.0/250.0
+    print x
+    x = int(conv*x)
+    if x!=100 and x!=200:
+        x = ''
+    print x
+    return x #"{0:.0f}".format(x)
+
 def compare_hisograms_temperature():
     for i in range(12,len(redshifts)):
         temp_filename = setup_dirs.path() + 'Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
@@ -98,14 +108,17 @@ def compare_dbtmaps():
     mini = -300
     maxi=300
     redshifts = [17.525,15.360,13.733]
-    mainfig = plt.figure()
-    mainfig.text(0.45,0.04,"Distance (Mpc)",ha='center',va='center')
-    mainfig.text(0.04,0.5,"Distance (Mpc)",ha='center',va='center',rotation='vertical')
+#    mainfig = plt.figure()
+#    mainfig.text(0.45,0.04,"Distance (Mpc)",ha='center',va='center')
+#    mainfig.text(0.04,0.5,"Distance (Mpc)",ha='center',va='center',rotation='vertical')
 
-    fig, axes = plt.subplots(2,3,figsize=(12,6))
+    fig, axes = plt.subplots(2,3,figsize=(12,8))
+    fig.text(0.5,0.04,"Distance (Mpc)",ha='center',va='center',fontsize=fontsize)
+    fig.text(0.03,0.5,"Distance (Mpc)",ha='center',va='center',rotation='vertical',fontsize=fontsize)
+
 #    plt.setp(axes[0,:],xticks=[])
 #    plt.setp(axes[:,1:3],yticks=[])
-    plt.subplots_adjust(left=None,bottom=None,right=None,top=None,wspace=0.05,hspace=0.02)
+    plt.subplots_adjust(left=None,bottom=None,right=None,top=None,wspace=0.02,hspace=0.02)
     for i in range(len(redshifts)):#start,len(redshifts)):
         print "Doing redshift " + str(redshifts[i])+"..."
         dbt_wpls = IO.readmap("dbt_"+str('%.3f' % redshifts[i]),'data_wpls/')
@@ -113,7 +126,7 @@ def compare_dbtmaps():
         
        # ax=plt.subplot(gs1[i])
        # plt.axis('on')
-        im = axes[1,i].imshow(dbt_wpls[250/2,:,:],cmap='gnuplot2',vmin=mini,vmax=maxi,origin='lower')
+        im = axes[0,i].imshow(dbt_wpls[250/2,:,:],cmap='gnuplot2',vmin=mini,vmax=maxi,origin='lower')
         axes[0,i].text(20,220,"z = "+str(redshifts[i]),fontsize=fontsize,color='white')
        # ax.set_xticklabels([])
        # ax.set_yticklabels([])
@@ -125,8 +138,8 @@ def compare_dbtmaps():
        # ax2=plt.subplot(gs1[i+3])
        # plt.axis('on')
 
-        axes[0,i].imshow(dbt_wstars[250/2,:,:],cmap='gnuplot2',vmin=mini,vmax=maxi,origin='lower')
-        axes[0,i].text(20,220,"z = "+str(redshifts[i]),fontsize=fontsize,color='white')
+        axes[1,i].imshow(dbt_wstars[250/2,:,:],cmap='gnuplot2',vmin=mini,vmax=maxi,origin='lower')
+#        axes[0,i].text(20,220,"z = "+str(redshifts[i]),fontsize=fontsize,color='white')
        # ax2.set_xticklabels([])
        # ax2.set_yticklabels([])
        # ax2.set_aspect('equal')
@@ -134,41 +147,51 @@ def compare_dbtmaps():
 
     #fig = plt.figure() 
 
-   # mainfig.text(0.45,0.04,"Distance (Mpc)",ha='center',va='center')
-   # mainfig.text(0.04,0.5,"Distance (Mpc)",ha='center',va='center',rotation='vertical')
     fig.subplots_adjust(right=0.85)
-    cbar_ax = fig.add_axes([0.85, 0.1, 0.03, 0.35])
-    cbar = fig.colorbar(im, cax=cbar_ax)
+    cbar_ax = fig.add_axes([0.9, 0.12, 0.03, 0.35])
+    cbar = fig.colorbar(im, cax=cbar_ax,ticks=[-300,-150,0,150,300])
+#    cbar.ax.set_yticklabels
     cbar.set_label("$\delta T_b (mK)$",size=fontsize)
-    cbar_ax = fig.add_axes([0.85,0.6,0.03,0.35])
-    fig.colorbar(im,cax=cbar_ax)
+
+    cbar_ax = fig.add_axes([0.9,0.52,0.03,0.35])
+    cbar = fig.colorbar(im,cax=cbar_ax,ticks=[-300,-150,0,150,300])
+    cbar.set_label("$\delta T_b (mK)$",size=fontsize)
 
     cnv=250.0/244.0
     for i in range(len(axes[:,0])):
         for j in range(len(axes[0,:])):
                 axes[i,j].tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, direction='out',pad=14.0,top='off',right='off')
-                axes[i,j].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off')
 
-                axes[i,j].tick_locs=[0,100*cnv,200*cnv]
-                axes[i,j].tick_lbls=[0,100,200]
-                m0 = MultipleLocator(50)
+                m0 = MultipleLocator(50*cnv)
                 axes[i,j].yaxis.set_major_locator(m0)
                 axes[i,j].xaxis.set_major_locator(m0)
-                m0 = MultipleLocator(10)
+
+                axes[i,j].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(mjfFormatter))
+                axes[i,j].xaxis.set_major_formatter(mpl.ticker.FuncFormatter(mjfFormatter))
+
+                m0 = MultipleLocator(10*cnv)
                 axes[i,j].yaxis.set_minor_locator(m0)
                 axes[i,j].xaxis.set_minor_locator(m0)
+        
+#                axes[i,j].set_xticklabels([])
 
-#    axes[0,0].tick_locs=[0,50*cnv,100*cnv,150*cnv,200*cnv,250*cnv]
-#    axes[0,0].tick_lbls=[0,50,100,150,200,250]
-#    axes[0,1].tick_locs=[0,50*cnv,100*cnv,150*cnv,200*cnv,250*cnv]
-#    axes[0,1].tick_lbls=[0,50,100,150,200,250]
+#                axes[i,j].tick_locs=[0,50*cnv,100*cnv,150*cnv,200*cnv]
+#                axes[i,j].tick_lbls=['0','','100','','200']
 
+
+    axes[0,0].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off',bottom='off')
+    axes[0,1].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off',bottom='off',left='off')
+    axes[0,2].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off',bottom='off',left='off')
+
+    axes[1,0].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off')
+    axes[1,1].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off',left='off')
+    axes[1,2].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off',left='off')
 
 
     plt.setp(axes[0,:],xticks=[])
     plt.setp(axes[:,1:3],yticks=[])
 
-##    plt.setp(axes[:,2],yticks=[])
+#    plt.setp(axes[:,2],yticks=[])
 #    axes[0,1].set_xticks
     
 
