@@ -7,14 +7,15 @@ http://ttt.astro.su.se/~hjens/c2raytools/
 
 import numpy as np
 import pylab as pl
+import power_spectrum as ps
 import sys
 sys.path.append('../')
 import setup_dirs
 #import redshifts as rs
 sys.path.append('../../src/')
 import c2raytools as c2t
-#sys.path.append('../')
-#import paths
+sys.path.append('../')
+import IO 
 
 redshifts = setup_dirs.read_redshifts()
 c2t.set_verbose(True)
@@ -57,4 +58,11 @@ def mean_dbt():
         file.write(str(np.mean(dT_box))+'\n')
     print "Written mean dbt to " + setup_dirs.resultsdir()+'mean_dbt.dat'
 
-
+def power_spectrum():
+    for i in range(len(redshifts)):
+        print "Doing redshift: " + str(redshifts[i])
+        data=IO.readmap("dbt_"+str('%.3f' % redshifts[i]))
+        powerspec=ps.power_spectrum_1d(data,500)
+        IO.write2data(powerspec[0],powerspec[1],setup_dirs.resultsdir()+'/powerSpectra_'+str('%.3f' % redshifts[i])+'.dat',setup_dirs.resutlsdir()+'/powerSpectraFrequencies_dbt_'+str('%.3f' % redshifts[i])+'.dat')
+    #    IO.writedata(powerspec[1],'data/powerSpectraFrequencies_'+str('%.3f' % redshifts[i])+'.dat')
+ 

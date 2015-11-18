@@ -44,7 +44,7 @@ def map_xfrac(id):
     print "Written map to " + filename
 
 def map_dbt():
-    for i in range(56,len(redshifts)):
+    for i in range(59,len(redshifts)):
         filename = setup_dirs.resultsdir()+'map_dbt_'+str('%.3f' % redshifts[i])+'.dat'
         temp_filename = setup_dirs.path()+'Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
         xfrac_filename = setup_dirs.path() +'xfrac3d_'+str('%.3f' % redshifts[i]) + '.bin'

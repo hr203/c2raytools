@@ -24,7 +24,7 @@ redshifts = setup_dirs.read_redshifts()
 #these need information from generate_data so leave until last
 
 #plot_1D.dbt_histogram()
-plot_2D.plotdbt()
+#plot_2D.plotdbt()
 #plot_1D.plot_mean(plot_1D.mean("temp"),"Tempererature","Temperature (K)")
 #
 #means = np.zeros(len(redshifts)*3).reshape(len(redshifts),3)
@@ -32,6 +32,10 @@ plot_2D.plotdbt()
 #means[:,1] = plot_1D.mean('xfracHe1')
 #means[:,2] = plot_1D.mean('xfracHe2')
 #plot_1D.plot_mean(np.log10(means),"x-frac","Log (Ionised Fraction)")
+meantemp=plot_1D.mean('temp')
+CMBtemp=2.725*(np.ones(len(redshifts))+redshifts)
+meantest=(meantemp-CMBtemp)/meantemp
+plot_1D.plot_mean(meantest,'test','Test')
 #
 #meandbt = plot_1D.mean('dbt')
 #print meandbt

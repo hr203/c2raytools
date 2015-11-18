@@ -10,11 +10,11 @@ import conv
 import cosmology
 import helper_functions as utils
 #import plotmap
-sys.path.append('../')
-import redshifts as rs
+#sys.path.append('../')
+#import redshifts as rs
 
 from scipy import fftpack
-import pdb
+#import pdb
 #import map as mapmod
 #import read
 

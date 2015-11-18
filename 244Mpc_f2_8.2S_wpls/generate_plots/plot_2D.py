@@ -23,7 +23,7 @@ redshifts = setup_dirs.read_redshifts()
 nosteps=setup_dirs.nosteps()
 
 
-start=55#49
+start=0#59#49
 mesh=250
 maxi = 0
 mini = 0
@@ -112,6 +112,34 @@ def plot_scatter_contour(x,y,name,ylabel,xlabel,it,nbins=200):
 
 
 def plot(dataslice,it,label,name,mini,maxi,cmap='hot',type='lin'):
+    
+    if name=='dbt':
+        cmapdbt = {'red':   ((0.0, 0.0, 0.0),
+                            (0.846, 0.0, 1.0),
+                            (1.0, 1.0, 1.0)),
+                   
+                   #'green':   ((0.1, 0.1, 0.1),
+                   #         (0.846, 0.1, 0.0),
+                   #         (0.0, 0.0, 0.0)),
+    
+                   'green': ((0.0, 0.0, 0.0),
+                            (0.846,0.0, 0.0),
+                            (1.0, 1.0, 1.0)),
+
+                   'blue':  ((0.0, 0.0, 0.0),
+                            (0.846, 1.0, 0.0),
+                            (1.0, 1.0, 1.0))
+
+                   #'white': ((0.0, 0.0, 0.0),
+                   #         (0.846, 1.0, 0.0),
+                   #         (1.0, 0.1, 1.0)),
+
+                  }
+
+
+        plt.register_cmap(name='dbtmap',data=cmapdbt)
+        cmap = plt.get_cmap('dbtmap')
+
     plt.figure()
     print mini,maxi
 #    plt.title(str(title) + ", Redshift: " + str(redshifts[it]))
@@ -143,13 +171,15 @@ def plottemp():
         plot(temperature[mesh/2,:,:],i,"Temperature (K)","temp",mini,maxi)
 
 def plotdbt():
-    mini = -300
-    maxi=300
+   
+    mini = -457
+    maxi=83
     print mini,maxi
     for i in range(start,len(redshifts)):
         print "Doing redshift " + str(redshifts[i])+"..."
         dbt = IO.readmap("dbt_"+str('%.3f' % redshifts[i]))
-        plot(dbt[mesh/2,:,:],i,"$\delta T_b$","dbt",mini,maxi,'gnuplot2')
+        print np.min(dbt)
+        plot(dbt[mesh/2,:,:],i,"$\delta T_b$","dbt",mini,maxi,'seismic')
     print "Complete"    
 
 def plotxfrac(id):
