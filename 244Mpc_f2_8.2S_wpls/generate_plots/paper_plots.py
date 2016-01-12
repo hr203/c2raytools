@@ -8,6 +8,10 @@ import setup_dirs
 sys.path.append('../../src')
 import c2raytools as c2t
 
+size=24#26
+lw = 2.5
+
+
 flag1="wstars"
 flag2="wpls"
 redshifts1=setup_dirs.read_redshifts(flag1)
@@ -151,85 +155,149 @@ def example2():
     axes = []
 
 def plot2():
-    print "calculating mean"
     length=min(len(redshifts1),len(redshifts2))
-    if length!=0:
-        length=length-1
-    rmsdata=np.zeros(length+1).reshape((length+1)/2,2)
-    meandata=np.zeros(length*2).reshape(length,2)
+#    if length!=0:
+#        length=length-1
+    wstars=np.zeros(length).reshape(length/2,2)
+    wpls=np.zeros(length).reshape(length/2,2)
     redshifts_short=np.zeros((length)/2)
-    for i in range(0,length):
-        print "opening ../generate_data/data_"+flag1+"/map_dbt_"+str('%.3f' % redshifts1[i])+".bin and ../generate_data/data_"+flag2+"/map_dbt_"+str('%.3f' % redshifts2[i])+".bin"
-        data1=np.load("../generate_data/data_"+flag1+"/map_dbt_"+str('%.3f' % redshifts1[i])+".bin")
-        data2=np.load("../generate_data/data_"+flag2+"/map_dbt_"+str('%.3f' % redshifts2[i])+".bin")
-        meandata[i,0]=np.mean(data1)
-        meandata[i,1]=np.mean(data2)
-        print "calculating rms"
-        if i%2==0 and i>len(redshifts_short):
+
+    file=open('../generate_data/data_'+flag1+'/mean_dbt.dat')
+    print 'Read mean from ../generate_data/data'+flag1+'/mean_dbt.dat'
+    i=-1
+    for line in file:
+        if i!=-1 and i<length and i%2==0:
+            wstars[i/2,0]=float(line)
+        i+=1
+    file.close
+
+    file=open('../generate_data/data_'+flag2+'/mean_dbt.dat')
+    print 'Read mean from ../generate_data/data_'+flag2+'/mean_dbt.dat'
+    i=-1
+    for line in file:
+        if i!=-1 and i<length and i%2==0:
+            wpls[i/2,0]=float(line)
             redshifts_short[i/2]=redshifts2[i]
-            mean2=np.mean(data2)
-            mean1=np.mean(data1)
-          #  length=len(data)
-            sum=0.0
-            print  "summing..."
-            for x in range(length):
-                for y in range(length):
-                    for z in range(length):
-                        rmsdata[i/2,0]=rmsdata[i/2,0]+(data1[x,y,z]-mean1)**2
-                        rmsdata[i/2,1]=rmsdata[i/2,1]+(data2[x,y,z]-mean2)**2
-            rmsdata[i/2,:]=np.sqrt(rmsdata[i/2,:]/(length**3)/2.0)
-    #        rmsdata[:,i]=np.sqrt(rmsdata[:,i]/(length**3)/2.0)
+        i+=1    
+    file.close
 
+    file=open('../generate_data/data_'+flag1+'/rms.dat')
+    print 'Read mean from ../generate_data/data_'+flag1+'/rms.dat'
+    i=-1
+    for line in file:
+        if i!=-1 and i<length and i%2==0:
+            wstars[i/2,1]=float(line)
+        i+=1
+    file.close
 
+    file=open('../generate_data/data_'+flag2+'/rms.dat')
+    print 'Reading mean from ../generate_data/data_'+flag2+'/rms.dat'
+    i=-1
+    for line in file:
+        if i!=-1 and i<length and i%2==0:
+            wpls[i/2,1]=float(line)
+        i+=1
+    file.close
 
-   # x = np.linspace(0, 2 * np.pi, 400)
-   # y = np.sin(x ** 2)
-    f, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
-    ax1.plot(redshifts2, meandata[:,0],label=label1,color='Blue')
-    ax1.plot(redshifts2, meandata[:,1],label=label2,color='Red')
-    ax1.set_title('Sharing both axes')
-    ax2.scatter(redshifts2, rmsdata[:,0],label=label1,color='Blue')
-    ax2.scatter(redshifts2, rmsdata[:,1],label=label2,color='Red')
-#    ax3.scatter(x, 2 * y ** 2 - 1, color='r')
-    # Fine-tune figure; make subplots close to each other and hide x ticks for
-    # all but bottom plot.
+    z=np.zeros(len(redshifts_short))
+
+    f, (ax1, ax2) = plt.subplots(2, sharex=True) 
+    ax1.set_xlim(redshifts_short[0],redshifts2[len(redshifts2)-1]) 
+    ax1.plot(redshifts_short,z,linewidth=lw,color="Black",linestyle='--')
+    ax1.plot(redshifts_short,wstars[:,0],label=label1,linestyle='-',linewidth=lw,color='Blue')
+    ax1.plot(redshifts_short,wpls[:,0],label=label2,linestyle='-',linewidth=lw,color='Red')
+    ax1.set_ylabel(r'$\bar{\delta T}$ [mK]',size=size)
+    ax2.plot(redshifts_short,wstars[:,0],linestyle='-',linewidth=lw,color='Blue')
+    ax2.plot(redshifts_short,wpls[:,1],linestyle='-',linewidth=lw,color='Red')
+    ax2.set_ylabel("$\delta$T RMS [mK]",size=size)
+    ax2.set_xlabel("Redshifts",size=size)
+
+    lg = ax1.legend(loc=2,prop={'size':size})
+    lg.draw_frame(False)
+    plt.tight_layout()
     f.subplots_adjust(hspace=0)
     plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
-    plt.savefig("plot2.png")
+    print "saving fig as paperplots/plot2.png"
+    plt.savefig("paperplots/plot2.png")
     
-    for i in range(len(meandata)):
-        print meandata[i]
-
-    for i in range(len(rmsdata)):
-        print meanrms[i]
 
 def plot6():
 
     length=min(len(redshifts1),len(redshifts2))
     #if length!=0:
     #    length=length-1
-    skewnessdata=np.zeros(length*2).reshape((length),2)
-    kurtosisdata=np.zeros(length*2).reshape(length,2)
-    redshifts_short=np.zeros((length)/2)
-    for i in range(0,length,2):
-        print "opening ../generate_data/data_"+flag1+"/map_dbt_"+str('%.3f' % redshifts1[i])+".bin and ../generate_data/data_"+flag2+"/map_dbt_"+str('%.3f' % redshifts2[i])+".bin"
-        data1=np.load("../generate_data/data_"+flag1+"/map_dbt_"+str('%.3f' % redshifts1[i])+".bin")
-        data2=np.load("../generate_data/data_"+flag2+"/map_dbt_"+str('%.3f' % redshifts2[i])+".bin")
-        skewnessdata[i,0] = c2t.statistics.skewness(data1)
-        skewnessdata[i,1] = c2t.statistics.skewness(data2)
-        kurtosisdata[i,0] = c2t.statistics.kurtosis(data1)
-        kurtosisdata[i,1] = c2t.statistics.kurtosis(data2)
-    f, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
-    ax1.plot(redshifts2, skewnessdata[:,0],label=label1,color='Blue')
-    ax1.plot(redshifts2, skewnessdata[:,1],label=label2,color='Red')
-    ax1.set_title('Sharing both axes')
-    ax2.scatter(redshifts2, kurtosisdata[:,0],label=label1,color='Blue')
-    ax2.scatter(redshifts2, kurtosisdata[:,1],label=label2,color='Red')
+    wstars=np.zeros(length).reshape(length/2,2)
+    wpls=np.zeros(length).reshape(length/2,2)
+    redshifts_short=np.zeros(length/2)
+
+
+    file=open('../generate_data/data_'+flag1+'/skewness.dat')
+    print 'Read mean from ../generate_data/data'+flag1+'/skewness.dat'
+    i=-1
+    for line in file:
+        if i!=-1 and i<length and i%2==0:
+            wstars[i/2,0]=float(line)
+        i+=1
+#        print len(wstars), i, line
+
+    file.close
+
+    file=open('../generate_data/data_'+flag2+'/skewness.dat')
+    print 'Read mean from ../generate_data/data_'+flag2+'/skewness.dat'
+    i=-1
+    for line in file:
+        if i!=-1 and i<length and i%2==0:
+            wpls[i/2,0]=float(line)
+            redshifts_short[i/2]=redshifts2[i]
+        i+=1
+    file.close
+
+    file=open('../generate_data/data_'+flag1+'/kurtosis.dat')
+    print 'Read mean from ../generate_data/data_'+flag1+'/kurtosis.dat'
+    i=-1
+    for line in file:
+        if i!=-1 and i<length and i%2==0:
+            wstars[i/2,1]=float(line)
+        i+=1
+    file.close
+
+    file=open('../generate_data/data_'+flag2+'/kurtosis.dat')
+    print 'Reading mean from ../generate_data/data_'+flag2+'/kurtosis.dat'
+    i=-1
+    for line in file:
+        if i!=-1 and i<length and i%2==0:
+            wpls[i/2,1]=float(line)
+        i+=1
+
+
+
+#    for i in range(0,length,2):
+#        print "opening ../generate_data/data_"+flag1+"/map_dbt_"+str('%.3f' % redshifts1[i])+".bin and ../generate_data/data_"+flag2+"/map_dbt_"+str('%.3f' % redshifts2[i])+".bin"
+#        data1=np.load("../generate_data/data_"+flag1+"/map_dbt_"+str('%.3f' % redshifts1[i])+".bin")
+#        data2=np.load("../generate_data/data_"+flag2+"/map_dbt_"+str('%.3f' % redshifts2[i])+".bin")
+#        skewnessdata[i,0] = c2t.statistics.skewness(data1)
+#        skewnessdata[i,1] = c2t.statistics.skewness(data2)
+#        kurtosisdata[i,0] = c2t.statistics.kurtosis(data1)
+#        kurtosisdata[i,1] = c2t.statistics.kurtosis(data2)
+    f, (ax1, ax2) = plt.subplots(2, sharex=True)
+    ax1.plot(redshifts_short,wstars[:,0],label=label1,linewidth=lw,linestyle="-",color='Blue')
+    ax1.plot(redshifts_short,wpls[:,0],label=label2,linewidth=lw,linestyle="-",color='Red')
+    ax1.set_ylabel("Skewness",size=size)
+    ax1.set_xlim(redshifts_short[0],redshifts2[len(redshifts2)-1])
+    ax2.plot(redshifts_short,wstars[:,1],label=label1,linewidth=lw,linestyle="-",color='Blue')
+    ax2.plot(redshifts_short,wpls[:,1],label=label2,linewidth=lw,linestyle="-",color='Red')
+    ax2.set_ylabel("Kurtosis",size=size)
+    ax2.set_xlabel("Redshift",size=size) 
+    lg = ax1.legend(loc=4,prop={'size':size})
+    lg.draw_frame(False)
+
+    plt.gcf().subplots_adjust(left=0.2,bottom=0.15)
 #    ax3.scatter(x, 2 * y ** 2 - 1, color='r')
     # Fine-tune figure; make subplots close to each other and hide x ticks for
     # all but bottom plot.
     f.subplots_adjust(hspace=0)
     plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
-    plt.savefig("plot6.png")
+    print "saveing figure as paperplots/plot6"
+    plt.savefig("paperplots/plot6.png")
 
-plot6()
+plot2()
