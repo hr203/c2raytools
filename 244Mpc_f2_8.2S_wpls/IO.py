@@ -23,6 +23,14 @@ def writedata(data,filename):
             print "deleted nan bin"
     print "Written to " + str(filename)
 
+#def writebin(data,filename):
+#    file = open(filename,'wb')
+#    for i in range(len(data)):
+#        if str(data[it])!='nan':
+#            file.write
+#        else:
+#            print "delted nan bin"
+
 
 def write2data(data,data2,filename,filename2):
     file = open(filename,'w')
@@ -54,6 +62,16 @@ def readmap(name,resultdir=setup_dirs.resultsdir()):
     print 'Read map from ../generate_data/'+setup_dirs.resultsdir()+'map_'+name+'.dat'
     return map
 
+def writebin(data,filename):
+    f = open(filename,'wb')
+    np.save(f,data)
+    print "written to " + str(filename)
+
+def readbin(filename):
+    f = open('../generate_data/'+setup_dirs.resultsdir()+filename,'rb')
+    return np.load(f)
+        
+
 def readoned(name):
     file = open('../generate_data/'+setup_dirs.resultsdir()+name+'.dat','r')
     cnt=0
@@ -82,4 +100,5 @@ def writemap(data,filename):
                 file.write(str(data[i,j,k])+'\n')
     print "Plotted data from " + filename
     file.close()
+
 

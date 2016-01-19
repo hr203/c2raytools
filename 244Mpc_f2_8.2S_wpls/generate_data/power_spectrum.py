@@ -9,6 +9,9 @@ sys.path.append('../../src/c2raytools/')
 import conv
 import cosmology
 import helper_functions as utils
+sys.path.append('../')
+import setup_dirs
+import IO
 #import plotmap
 #sys.path.append('../')
 #import redshifts as rs
@@ -17,6 +20,7 @@ from scipy import fftpack
 #import pdb
 #import map as mapmod
 #import read
+redshifts = setup_dirs.read_redshifts()
 
 #redshifts = rs.read_redshifts("../red_ori2.dat")
 #mesh=250
@@ -251,7 +255,13 @@ def get_dims(box_dims, ashape):
 		return [box_dims]*len(ashape)
 	return box_dims
 
-#for i in range(len(redshifts)):
-#    data=read.readmap("dbt_"+str('%.3f' % redshifts[i])+'.dat')
-#    ps=power_spectrum_1d(data)
-#    read.writedata(ps,'data/powerSpectra_'+str('%.3f' % redshifts[i])+'.dat') 
+def ps():
+    for i in range(len(redshifts)):
+        data=IO.readmap("dbt_"+str('%.3f' % redshifts[i]))
+        ps=power_spectrum_1d(data)
+        ps=np.asarray(ps)
+        print np.shape(ps),type(ps)
+        IO.writedata(ps[0,:],'data/powerSpectra_dbt_'+str('%.3f' % redshifts[i])+'.dat') 
+        IO.writedata(ps[1,:],'data/powerSpectraFrequencies_dbt_'+str('%.3f' % redshifts[i])+'.dat') 
+
+#ps()

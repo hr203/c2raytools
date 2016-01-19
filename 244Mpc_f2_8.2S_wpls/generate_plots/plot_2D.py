@@ -1,3 +1,4 @@
+from matplotlib.font_manager import FontProperties
 import numpy as np
 import pylab as pl
 import sys
@@ -12,18 +13,18 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import MultipleLocator
-mpl.rc('xtick', labelsize=22) 
-mpl.rc('ytick', labelsize=22) 
+mpl.rc('xtick', labelsize=25)#26) 
+mpl.rc('ytick', labelsize=25)#26) 
 mpl.rc('font',family='serif')
-fontsize=24
-numberfontsize=22
+fontsize=26
+numberfontsize=25
 tickwidth=1.5
 
 redshifts = setup_dirs.read_redshifts()
 nosteps=setup_dirs.nosteps()
 
-
-start=0#59#49
+ss=121
+start=0
 mesh=250
 maxi = 0
 mini = 0
@@ -45,7 +46,7 @@ def findmax(data):
 
 def plot_scatter_contour(x,y,name,ylabel,xlabel,it,nbins=200):
     #plt.figure()
-    fig=plt.figure(figsize=(9, 7.25), dpi= 300)
+    fig=plt.figure(figsize=(9, 10), dpi= 300)
     plt.subplot('111', axisbg='black')
     ax = plt.gca()
     #general tick parameters
@@ -109,11 +110,71 @@ def plot_scatter_contour(x,y,name,ylabel,xlabel,it,nbins=200):
  #   fig.tight_layout()
 #    plt.savefig(setup.plotsdir()+name+"_"+str(it+10)+"_"+str(redshifts[it])+".png")
 
+def plot_lightcone(dataslice,it,label,name,mini,maxi,redshifts,cmap='hot',type='lin'):
+    if name=='dbt' or name=='dbt_lightcone':
+        print "using dbt colourmap"
+        cmapdbt = {'red':   ((0.0, 0.0, 0.0),
+                            (0.846, 0.0, 1.0),
+                            (1.0, 1.0, 1.0)),
+
+                   'green': ((0.0, 0.0, 0.0),
+                            (0.846,0.0, 0.0),
+                            (1.0, 1.0, 1.0)),
+
+                   'blue':  ((0.0, 0.0, 0.0),
+                            (0.846, 1.0, 0.0),
+                            (1.0, 1.0, 1.0))
+                  }
+        plt.register_cmap(name='dbtmap',data=cmapdbt)
+        cmap = plt.get_cmap('dbtmap')
+
+    fig,axes =plt.subplots(1,1,figsize=(26,6))
+    if (type=='lin'):
+        im = plt.imshow(dataslice,cmap=cmap,vmin=mini,vmax=maxi,origin='lower')
+    else:
+        im = plt.imshow(dataslice,cmap=cmap,norm=LogNorm(),vmin=mini,vmax=maxi,origin='lower')
+    font = FontProperties()
+    font.set_weight('bold')
+
+    cnv=250.0/244.0
+    ytick_locs=[0,50*cnv,100*cnv,150*cnv,200*cnv,250*cnv]
+    ytick_lbls=[0,50,100,150,200,250]
+    
+    axes.tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, direction='out',pad=14.0,top='off',right='off')
+    m0=MultipleLocator(200)
+    axes.xaxis.set_major_locator(m0)
+
+    m0=MultipleLocator(100)
+    axes.xaxis.set_minor_locator(m0)
+
+    labels = np.zeros(len(redshifts)/200+2)
+    print len(labels-1)
+    for i in range(len(dataslice[1,:])):
+        if (i+1)%200==0: 
+            if i<len(redshifts) and i/100<len(labels):
+                labels[i/100] = str('%.2f'%redshifts[i])
+    labels[len(labels)-2]=str('%.2f'%redshifts[len(redshifts)-2])
+    print labels
+    axes.set_xticklabels(labels[::-1])
+    plt.xlabel("z",size=fontsize)
+    plt.ylabel("Distance (Mpc)",size=fontsize) 
+    fig.subplots_adjust(right=0.85)
+    cbar_ax = fig.add_axes([0.87, 0.25, 0.02, 0.5])
+    cbar = fig.colorbar(im, cax=cbar_ax,ticks=[-400,-300,-200,-100,0,100,200,300])
+    cbar.ax.set_yticklabels
+    cbar.set_label("$\delta T_b \ (mK)$",size=fontsize)
+
+#    plt.tight_layout()
+    print "saving as..." + setup_dirs.plotsdir()+name+".png"
+    plt.savefig(setup_dirs.plotsdir()+name+".png")
+    plt.close()
+
 
 
 def plot(dataslice,it,label,name,mini,maxi,cmap='hot',type='lin'):
     
-    if name=='dbt':
+    if name=='dbt' or name=='dbt_lightcone_':
+        print "using dbt colourmap"
         cmapdbt = {'red':   ((0.0, 0.0, 0.0),
                             (0.846, 0.0, 1.0),
                             (1.0, 1.0, 1.0)),
@@ -140,22 +201,52 @@ def plot(dataslice,it,label,name,mini,maxi,cmap='hot',type='lin'):
         plt.register_cmap(name='dbtmap',data=cmapdbt)
         cmap = plt.get_cmap('dbtmap')
 
-    plt.figure()
+    #plt.figure()
+    plt.figure(figsize=(9,7.25),dpi=300)
+    #plt.subplots_adjust(right=0.3)
+    #plt.subplots_adjust(bottom=1.3)
+
     print mini,maxi
 #    plt.title(str(title) + ", Redshift: " + str(redshifts[it]))
     if (type=='lin'):
-        plt.imshow(dataslice,cmap=cmap,vmin=mini,vmax=maxi,origin='lower')
+        im = plt.imshow(dataslice,cmap=cmap,vmin=mini,vmax=maxi,origin='lower')
     else:
-        plt.imshow(dataslice,cmap=cmap,norm=LogNorm(),vmin=mini,vmax=maxi,origin='lower')
-    cbar = plt.colorbar(orientation='vertical')
-    cbar.set_label(label,size=19)
+        im = plt.imshow(dataslice,cmap=cmap,norm=LogNorm(),vmin=mini,vmax=maxi,origin='lower')
+    font = FontProperties()
+    font.set_weight('bold')
+    if name == "xfrac" : 
+        plt.text(20,220,"HII",fontsize=fontsize,color='white')
+    if name == "xfracHe1" : 
+        plt.text(20,220,"HeII",fontsize=fontsize,color='white')
+    if name == "xfracHe2" : 
+        plt.text(20,220,"HeIII",fontsize=fontsize,color='white')
+        plt.text(150,20,"z = "+str(redshifts[it]),fontsize=fontsize,color='red')
+    if name == "Temperature":
+        plt.text(20,220, "Temperature",fontsize=fontsize,color='white')
+    
+    if name!='dbt':
+        print "not dbt..."
+        cbar = plt.colorbar(im,orientation='vertical',fraction=0.046,pad=0.04)
+        cbar.set_label(label,size=fontsize)
+    #cbar.ax.set_yticklabels
+        if name!="Temperature" :
+            cbar.set_ticks([1.,1./10.0,1./100.0,1./1000.0,1./10000.0,1./1000000.0])
+            cbar.set_ticklabels(['$ \ 10 ^0 $  ','$ \ 10  ^{-1}  $  ','$ \ 10  ^{-2}  $  ','$ \ 10  ^{-3}  $  ','$ \ 10  ^{-4}  $  ','$ \ 10 ^{-5}  $  '])
+        else:
+            cbar.set_ticks([2000,4000,6000,8000,10000,12000,14000])
+            cbar.set_ticklabels(['  2  ','  4  ','  6  ','  8  ','  10  $ \ $','  12  ' , '  14   '])
 
     cnv=250.0/244.0
     tick_locs=[0,50*cnv,100*cnv,150*cnv,200*cnv,250*cnv]
     tick_lbls=[0,50,100,150,200,250]
-    plt.xlabel("Distance (Mpc/h)",size=18)
-    plt.ylabel("Distance (Mpc/h)",size=18)
-    #plt.title(title+", Redshift: "+str(redshifts[it]))
+    #plt.xlabel("Distance (Mpc/h)",size=18)
+    #plt.ylabel("Distance (Mpc/h)",size=18)
+    #plt.title(title+", Redshift: "+str(redshifts[it]))i
+
+    #plt.tight_layout()
+#    if name == "Temperature":
+    #plt.gcf().subplots_adjust(left=0.5)
+    print "saving as..." + setup_dirs.plotsdir()+name+"_"+str(it+10)+"_"+str(redshifts[it])+".png"
     plt.savefig(setup_dirs.plotsdir()+name+"_"+str(it+10)+"_"+str(redshifts[it])+".png")
     plt.close()
 
@@ -168,7 +259,7 @@ def plottemp():
         maxi = 14300.0
 #        if (i == (len(redshifts)-25)):
  #           maxi = findmax(temperature)/2.0
-        plot(temperature[mesh/2,:,:],i,"Temperature (K)","temp",mini,maxi)
+        plot(temperature[len(temperature[:,0,0])/2,:,:],i,"Temperature (k K)","Temperature",mini,maxi)
 
 def plotdbt():
    
@@ -177,10 +268,24 @@ def plotdbt():
     print mini,maxi
     for i in range(start,len(redshifts)):
         print "Doing redshift " + str(redshifts[i])+"..."
-        dbt = IO.readmap("dbt_"+str('%.3f' % redshifts[i]))
+        dbt = np.load("../generate_data/"+setup_dirs.resultsdir()+"map_dbt_"+str('%.3f' % redshifts[i])+".bin")
+#IO.readmap("dbt_"+str('%.3f' % redshifts[i]))
         print np.min(dbt)
-        plot(dbt[mesh/2,:,:],i,"$\delta T_b$","dbt",mini,maxi,'seismic')
+        plot(dbt[len(dbt[:,0,0])/2,:,:],i,"$\delta T_b$","dbt",mini,maxi,'seismic')
     print "Complete"    
+
+def plotdbt_lightcone():
+
+    mini = -457
+    maxi=83
+    print mini,maxi
+    for i in range(start,len(redshifts)):
+        print "Doing redshift " + str(redshifts[i])+"..."
+        dbt = IO.readmap("dbt_lightcone_"+str('%.3f' % redshifts[i]))
+        print np.min(dbt)
+        plot(dbt[len(dbt[:,1,1])/2,:,:],i,"$\delta T_b$","dbt_lightcone",mini,maxi,'seismic')
+    print "Complete"
+
 
 def plotxfrac(id):
     for i in range(start,len(redshifts)):
@@ -189,7 +294,7 @@ def plotxfrac(id):
         xfrac = c2t.XfracFile(xfrac_filename).xi
         maxi = 1.0
         mini = 0.000199999994948
-        plot(xfrac[mesh/2,:,:],i,id + "Ionised Fraction","xfrac"+id,mini,maxi,cmap='Blues_r',type='log')
+        plot(xfrac[len(xfrac[:,1,1])/2,:,:],i,"Ionised Fraction","xfrac"+id,mini,maxi,cmap='Blues_r',type='log')
 
 def scatter_contour():
     for i in range(start,len(redshifts)):
@@ -214,6 +319,7 @@ def equation_of_state():
             density_filename='/research/prace/244Mpc_RT/244Mpc_f2_8.2pS_250/coarser_densities/' + str('%.3f' % redshifts[i-i%nosteps-1]) + 'n_all.dat'
             print "density filename: "+ str('%.3f' % redshifts[i-(i)%nosteps-1]) + 'n_all.dat'
         density = c2t.DensityFile(density_filename).cgs_density.flatten()
+        #density = np.ones(ss**3).reshape(ss,ss,ss)*1.981e-10*(1+redshifts[i])**3
         print "Read density file"
         temp_filename = setup_dirs.path() + 'Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
         temperature = c2t.TemperFile(temp_filename).temper.flatten()
@@ -221,7 +327,19 @@ def equation_of_state():
         print "Generating plots..."
         plot_scatter_contour(density,temperature,"equation_of_state","Temperature (K)","Density ($\mathrm{\Omega}$)",i)
 
-
+def lightcone():
+    filenames = ["" for x in range(len(redshifts))]
+#    filenames[0] = len(redshifts)
+    mini = -457
+    maxi=83 
+    for i in range(len(filenames)):
+        #filenames[i] = setup_dirs.path() + 'lightcone_temp/Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
+        filenames[i-20] = '../generate_data/'+setup_dirs.resultsdir()+'dbt/map_dbt_'+str('%.3f' % redshifts[i]) + '.bin'
+    im,z=c2t.make_lightcone(filenames,redshifts[len(redshifts)-1],redshifts[0]) 
+    im=np.asarray(im)
+    print(im[125,:,::-1])
+    print(im[1,1,1])
+    plot_lightcone(im[125,:,::-1],i,"$\delta$ T","dbt_lightcone",mini,maxi,z,cmap='Blues_r')
 #scatter()
 #plottemp()
 #plotxfrac('')
