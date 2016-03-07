@@ -76,17 +76,19 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
     mesh_size = get_mesh_size(filenames[0])
     
     output_z = _get_output_z(file_redshifts, z_low, z_high, mesh_size[0])
-
+    print output_z
     #Make the output 32-bit to save memory 
     lightcone = np.zeros((mesh_size[0], mesh_size[1], len(output_z)), dtype='float32')
     
     comoving_pos_idx = 0
     z_bracket_low = None; z_bracket_high = None
     data_low = None; data_high = None
-    
+    print 'Making lightcone between %f < z < %f' % (output_z.min(), output_z.max())
+     
     #Make the lightcone, one slice at a time
     print_msg('Making lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
     for z in output_z:
+        print "Doing z " +str(z)
         z_bracket_low_new = file_redshifts[file_redshifts <= z].max()
         z_bracket_high_new = file_redshifts[file_redshifts > z].min()
         
@@ -95,6 +97,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
             z_bracket_low = z_bracket_low_new
             file_idx = np.argmin(np.abs(file_redshifts - z_bracket_low))
             if data_high == None:
+                print "data_high = None"
                 data_low, datatype = get_data_and_type(filenames[file_idx], cbin_bits, cbin_order, raw_density)
             else: #No need to read the file again
                 data_low = data_high
@@ -108,10 +111,12 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
         #Make the slice by interpolating, then move to next index
         data_interp = _get_interp_slice(data_high, data_low, z_bracket_high, \
                                     z_bracket_low, z, comoving_pos_idx, los_axis, interpolation)
+        #print data_interp
         lightcone[:,:,comoving_pos_idx] = data_interp
         
+        print "comoving position: " + str(comoving_pos_idx)
         comoving_pos_idx += 1
-        
+#    print lightcone    
     return lightcone, output_z
 
 

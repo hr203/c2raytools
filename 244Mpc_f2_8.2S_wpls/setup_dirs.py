@@ -4,24 +4,36 @@ import numpy
 
 
 #FLAG = 'wpls' #for power laws only
-#FLAG = 'wquasars'  #for quasars only
+FLAG = 'wquasars'  #for quasars only
 #FLAG = 'wquasars_wpls' #for both
 
-#sims redone on apollo
-FLAG = 'wstars' #for neither
+#sims redone on apollo#FLAG = 'wstars' #for neither
+#FLAG = 'wstars'
 #FLAG = 'wstars_equalphotons' #for neither
 #FLAG = 'compare_wstars_wpls'
 
-#kylsim
+#tests
 #FLAG = 'kylsim'
-#FLAG = 'wpls2'
-#FLAG = 'wpls_higheff'
-
+#FLAG = 'test'
+#res=200
 #steps = 2
 
-basepath = '/lustre/scratch/astro/hr203/RESULTS/244Mpc_f2_8.2S_H250_'+FLAG+'/' 
-results_dir= 'data_'+FLAG+'/'
-plots_dir = 'plots_'+FLAG+'/'
+
+
+if FLAG!='test':
+    results_dir= 'data_'+FLAG+'/'
+    plots_dir = 'plots_'+FLAG+'/'
+    basepath = '/lustre/scratch/astro/hr203/RESULTS/244Mpc_f2_8.2S_H250_'+FLAG+'/' 
+else:
+    results_dir='tests/data_'+str(res)+'/'
+    plots_dir='tests/data_'+str(res)+'/'
+    basepath = '/lustre/scratch/astro/hr203/RESULTS/tests/'+str(res)+'_box/'
+
+def get_res():
+    if FLAG=='test':
+        return res
+    else:
+        return ' ' 
 
 def path():
     return basepath
@@ -36,22 +48,6 @@ def plotsdir():
 def read_redshifts(flag = FLAG):
 
     file = '../red_' + flag +'.dat'
-
-        
-#    if FLAG == 'wpls':
-#        file = "../red_wpls.dat" 
-#    elif FLAG == 'wquasars':
-#        file = "../red_wquasars.dat"
-#    elif FLAG == "wquasars_wpls":
-#        file = "../red_wquasars_wpls.dat"
-#    elif FLAG == "wstars":
-#        file = "../red_wstars.dat"
-#    elif FLAG == "kylsim":
-#        file = "../red_wkylsim.dat"
-#    elif FLAG == 'wpls2':
-#        file - "../red_wpls2.dat"
-#    else:
-#        print "Flag incorrect"
 
     noRedshifts = -1
     with open(file, "r") as f:

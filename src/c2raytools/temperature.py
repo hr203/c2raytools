@@ -71,7 +71,8 @@ def calc_dt_full(xfrac, temp, dens, z = -1):
 	print_msg('Making full dT box for z=%f' % z)
 	
 	#Calculate dT
-	return _dt_full(dens,xfrac,temp,z)#rho, Ts, xi, z)
+        print "calculating corrected dbt"
+	return _dt_full_corrected(dens,xfrac,temp,z)#rho, Ts, xi, z)
 
 def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
 	'''
@@ -145,7 +146,8 @@ def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2):
 	cdist_low = cosmology.z_to_cdist(lowest_z)
 	cdist = np.arange(xfrac.shape[los_axis])*cell_size + cdist_low
 	z = cosmology.cdist_to_z(cdist)
-	return _dt_full(dens, temp, xfrac, z)
+        print "Redshift: ", str(z)
+	return _dt_full_corrected(dens, xfrac,temp, z)
 
 def mean_dt(z):
 	'''
@@ -175,13 +177,47 @@ def _dt(rho, xi, z):
 	return dt
 
 def _dt_full(rho, xi, Ts, z):
-		
+        print "Redshift: " +str(z) +'\n'
 	rho_mean = const.rho_crit_0*const.OmegaB
         Tcmb = 2.725*(1+z) # might want to add to cosmology.py instead
 	Cdt = mean_dt(z)
-        dt = ((Ts.temper-Tcmb)/Ts.temper)*Cdt*(1.0-xi.xi)*rho.cgs_density/rho_mean  #extra term for temperature fluctuations as Ts is not much greater than Tcmb, Hannah Ross
+        print type(Ts),type(Tcmb),type(Cdt),type(xi),type(rho)
+        dt = ((Ts.temper-Tcmb)/Ts.temper)*Cdt*(1.0-xi)*rho/rho_mean  #extra term for temperature fluctuations as Ts is not much greater than Tcmb, Hannah Ross
+        #dt = ((Ts-Tcmb)/Ts)*Cdt*(1.0-xi.xi)*rho.cgs_density/rho_mean  #extra term for temperature fluctuations as Ts is not much greater than Tcmb, Hannah Ross
 #	dt = (1+Tcmb/Ts)*Cdt*(1.0-xi)*rho/rho_mean
 	
 	return dt
 	
+def _dt_full_corrected(rho, xi, Ts, z):
+        z = np.mean(z)
+        print "Redshift: " +str(z) +'\n'
+        rho_mean = const.rho_crit_0*const.OmegaB
+        Tcmb = 2.725*(1+z) # might want to add to cosmology.py instead
+        Cdt = mean_dt(z)
+
+        zi = 1089
+        Tcmb0=2.726
+        Ti=Tcmb0*(1+zi)
+        T_HII=2.0e4
+        T_min = Ti*(1+z)**2/(1+zi)**2
+#        print T_min
+        ones=np.ones(250**3,dtype=float).reshape(250,250,250)
+#        print z
+        #print type(z),type(Ts.temper), type(T_min), type(T_HII), type(xi)
+        for i in range(len(xi[:,1,1])):
+            for j in range(len(xi[1,:,1])):
+                for k in range(len(xi[1,1,:])):
+                    Ts.temper[i,j,k] = max(T_min,(Ts.temper[i,j,k]-xi[i,j,k]*T_HII)/(1.-xi[i,j,k]))
+                        
+ #       print np.mean(Ts.temper)
+#        Ts.temper = (Ts.temper-xi*T_HII)/(ones-xi)
+        if np.any(Ts.temper < 0):
+            print "WARNING: negative temperatures"
+#        print type(Ts),type(Tcmb),type(Cdt),type(xi),type(rho)
+
+        dt = ((Ts.temper-Tcmb)/Ts.temper)*Cdt*(1.0-xi)*rho/rho_mean  #extra term for temperature fluctuations as Ts is not much greater than Tcmb, Hannah Ross
+        #dt = ((Ts-Tcmb)/Ts)*Cdt*(1.0-xi.xi)*rho.cgs_density/rho_mean  #extra term for temperature fluctuations as Ts is not much greater than Tcmb, Hannah Ross
+#       dt = (1+Tcmb/Ts)*Cdt*(1.0-xi)*rho/rho_mean
+
+        return dt
 

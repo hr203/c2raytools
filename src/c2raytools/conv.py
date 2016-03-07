@@ -29,9 +29,9 @@ def set_sim_constants(boxsize_cMpc):
 		Nothing.
 	'''
 	global boxsize, LB, nbox_fine, M_box, M_grid, lscale, tscale, velconvert
-
+        
 	boxsize = boxsize_cMpc
-	LB = boxsize/const.h	
+	LB = boxsize/const.h
 	if hf.flt_comp(boxsize, 425.):
 		hf.print_msg('Setting conversion factors for 425/h Mpc box')
 		nbox_fine = 10976

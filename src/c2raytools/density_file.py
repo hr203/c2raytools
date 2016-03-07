@@ -65,6 +65,7 @@ class DensityFile:
 
 		#Convert to g/cm^3 (comoving)
 		conv_factor = const.rho_crit_0*(float(self.mesh_x)/float(conv.nbox_fine))**3*const.OmegaB
+                print "CONVERSION FACTOR: "+str(conv_factor)
 		self.cgs_density = self.raw_density*conv_factor
 		print_msg('Mean density: %g' % np.mean(self.cgs_density.astype('float64')))
 		print_msg('Critical matter density: %g' % (const.rho_crit_0*const.OmegaB))
