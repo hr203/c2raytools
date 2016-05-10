@@ -34,17 +34,18 @@ def mean(name,pathd = path_data,redshifts1=redshifts):
         i=i+1
     return mean
 
-def plot_mean(data,title,ylabel,pathp = path_plots, redshifts1=redshifts, redshifts2=redshifts,legend1='',legend2='',legend3=''):
+def plot_mean(data,title,ylabel,pathp = path_plots, redshifts1=redshifts, redshifts2=redshifts,legend1='',legend2='',legend3='',legend4=''):
     #plt.figure()
     fig=plt.figure(figsize=(10.25, 10.25), dpi= 300)
 #    plt.subplot('111')
     ax = plt.gca()
     ax.tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, pad=14.0,top='off',right='off')
     ax.tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,top='off',right='off')
-
+    print data.shape
+    print len(redshifts1)
     if(data.shape==(len(redshifts1),)):  
         plt.plot(redshifts1,data)
-    elif(data.shape==(len(redshifts1),2) or data.shape==((len(redshifts1))/2,2) or  data.shape==((len(redshifts1)-1)/2,2)):
+    elif(data.shape==(len(redshifts1),2) or data.shape==((len(redshifts1))/2,2) or  data.shape==((len(redshifts1)-1)/2,2) or data.shape==(len(redshifts2),2) or data.shape==(len(redshifts2)/2,2) or data.shape==((len(redshifts2)-1)/2,2)):
         if legend1 == '' or legend2 =='':
             print "WARNING: Specify legend for plotting two data sets"
         plt.gcf().subplots_adjust(left=0.15)
@@ -59,8 +60,8 @@ def plot_mean(data,title,ylabel,pathp = path_plots, redshifts1=redshifts, redshi
             ax.yaxis.set_minor_locator(m0)
             zeros = np.zeros(len(redshifts1))
             plt.plot(redshifts1,zeros,color='black',linestyle='--',linewidth=l)
-            plt.ylim(-250,100)
-        if title=="Temperature":
+            #plt.ylim(-250,100)
+        if title=="Temperature (K)":
             linestyle2 ='-'
             T0=2.725
             Tcmb = np.zeros(len(redshifts1))
@@ -79,24 +80,70 @@ def plot_mean(data,title,ylabel,pathp = path_plots, redshifts1=redshifts, redshi
         m0 = MultipleLocator(0.5)
         ax.xaxis.set_minor_locator(m0)
 
-        print redshifts2 
-        print legend1, legend2 
+#        print data[0 
+#        print legend1, legend2 
         plt.plot(redshifts1,data[0:len(redshifts1),0],label=legend1,color='blue',linestyle=linestyle2,linewidth=l)
-        plt.plot(redshifts2,data[0:len(redshifts2),1],label=legend2,color='red',linestyle=linestyle2,linewidth=l)
+        plt.plot(redshifts1,data[0:len(redshifts1),1],label=legend2,color='red',linestyle=linestyle2,linewidth=l)
         lg = plt.legend(loc=2,prop={'size':fontsize})
         lg.draw_frame(False)
 
-    elif (data.shape==(len(redshifts1),3)):
+    elif (data.shape==(len(redshifts1),3) or data.shape==(len(redshifts2),3)):
         plt.plot(redshifts1,data[:,0],label=legend1)
         plt.plot(redshifts1,data[:,1],label=legend2)
         plt.plot(redshifts1,data[:,2],label=legend3)
 
-        if legend1 == '' or legend2=='' or lengend3=='':
+        if legend1 == '' or legend2=='' or legend3=='':
             print "WARNING: Specify legend for plotting three data sets"
         else:
             lg = plt.legend(loc=4,prop={'size':fontsize})
             lg.draw_frame(False)
-    elif (data.shape==(len(redshifts1),6)): #plotting for comparing xfracs
+
+    elif(data.shape==(len(redshifts1),4) or data.shape==((len(redshifts1))/2,4) or  data.shape==((len(redshifts1)-1)/2,4) or data.shape==(len(redshifts2),4) or data.shape==(len(redshifts2)/2,4) or data.shape==((len(redshifts2)-1)/2,4)):
+        if legend1 == '' or legend2 =='' or legend3 == '' or legend4=='':
+            print "WARNING: Specify legend for plotting two data sets"
+        plt.gcf().subplots_adjust(left=0.15)
+        l = 2.0 #linewidth value
+        linestyle2='--'
+        #plot CMB temperature
+        if title == "dbt":
+            #yaxis
+            m0 = MultipleLocator(50)
+            ax.yaxis.set_major_locator(m0)
+            m0 = MultipleLocator(10)
+            ax.yaxis.set_minor_locator(m0)
+            zeros = np.zeros(len(redshifts1))
+            plt.plot(redshifts1,zeros,color='black',linestyle='--',linewidth=l)
+            #plt.ylim(-250,100)
+        if title=="Temperature (K)":
+            linestyle2 ='-'
+            T0=2.725
+            Tcmb = np.zeros(len(redshifts1))
+            for z in range(len(redshifts1)):
+                Tcmb[z] = T0*(1.0+redshifts1[z])
+            plt.plot(redshifts1,Tcmb,label='$T_{cmb}$',color='black',linestyle=':',linewidth=l)
+                    #plt.legend(loc=4,prop={'size':18})
+            #yaxis
+            m0 = MultipleLocator(100)
+            ax.yaxis.set_major_locator(m0)
+            m0 = MultipleLocator(20)
+            ax.yaxis.set_minor_locator(m0)
+        #x-axis
+        m0 = MultipleLocator(1)
+        ax.xaxis.set_major_locator(m0)
+        m0 = MultipleLocator(0.5)
+        ax.xaxis.set_minor_locator(m0)
+        print "hello"
+#        print data[0 
+#        print legend1, legend2 
+        plt.plot(redshifts1,data[0:len(redshifts1),0],label=legend1,color='blue',linestyle=linestyle2,linewidth=l)
+        plt.plot(redshifts1,data[0:len(redshifts1),1],label=legend2,color='red',linestyle=linestyle2,linewidth=l)
+        plt.plot(redshifts1,data[0:len(redshifts1),2],label=legend2,color='blue',linestyle='--',linewidth=l)
+        plt.plot(redshifts1,data[0:len(redshifts1),3],label=legend2,color='red',linestyle='--',linewidth=l)
+        lg = plt.legend(loc=2,prop={'size':fontsize})
+        lg.draw_frame(False)
+
+
+    elif (data.shape==(len(redshifts1),6) or data.shape==(len(redshifts2),6)): #plotting for comparing xfracs
         if legend1 == '' or legend2=='':
             print "WARNING: Specify legend for plotting three data sets"
         a = 0.5 #alpha value
@@ -120,6 +167,18 @@ def plot_mean(data,title,ylabel,pathp = path_plots, redshifts1=redshifts, redshi
         ax.xaxis.set_major_locator(m0)
         m0 = MultipleLocator(0.5)
         ax.xaxis.set_minor_locator(m0)
+
+    elif (data.shape==(len(redshifts1),4)):
+        plt.plot(redshifts1,data[:,0],label=legend1)
+        plt.plot(redshifts1,data[:,1],label=legend2)
+        plt.plot(redshifts1,data[:,2],label=legend3)
+        plt.plot(redshifts1,data[:,3],label=legend4)
+
+        if legend1 == '' or legend2=='' or legend3=='' or legend4=='':
+            print "WARNING: Specify legend for plotting three data sets"
+        else:
+            lg = plt.legend(loc=4,prop={'size':fontsize})
+            lg.draw_frame(False)
  
     else:
         print "Data is in wrong format"
@@ -170,31 +229,31 @@ def plot_dbt_histogram(data,title,name,xlabel,nobins=500,type='log'):
     ax = fig.add_subplot(111)
     ax.set_yscale('log',basey=10)
     weights = np.ones_like(data)/float(len(data))
-    logbins = np.zeros(nobins)
-    logbins[nobins/2:nobins] = np.logspace(-10,np.log10(100),nobins/2)
-    temp = -1*np.logspace(-10,np.log10(100),nobins/2)
-    logbins[0:nobins/2] = temp[::-1]
+    #logbins = np.zeros(nobins)
+    #logbins[nobins/2:nobins] = np.logspace(-10,np.log10(100),nobins/2)
+    #temp = -1*np.logspace(-10,np.log10(100),nobins/2)
+    #logbins[0:nobins/2] = temp[::-1]
     #print logbins
     #print logbins
 
-    if(data.shape==(len(redshifts1),)):
-        ax.hist(data,weights=weights,bins=logbins,histtype='stepfilled',color='red',edgecolor='red')
+    #if(data.shape==(len(redshifts1),))
+    ax.hist(data,weights=weights,bins=500,histtype='stepfilled',color='blue',edgecolor='blue')
 
-    elif(data.shape==(len(redshifts1),2)):
-        if legend1 == '' or legend2 =='':
-            print "WARNING: Specify legend for plotting two data sets"
-        ax.hist(data[:,0],weights=weights,bins=logbins,histtype='stepfilled',color='blue',edgecolor='red')
-        ax.hist(data[:,1],weights=weights,bins=logbins,histtype='stepfilled',color='red',edgecolor='red')
+#    elif(data.shape==(len(redshifts1),2)):
+#        if legend1 == '' or legend2 =='':
+#            print "WARNING: Specify legend for plotting two data sets"
+#        ax.hist(data[:,0],weights=weights,bins=logbins,histtype='stepfilled',color='blue',edgecolor='red')
+#        ax.hist(data[:,1],weights=weights,bins=logbins,histtype='stepfilled',color='red',edgecolor='red')
+#
 
-
-    plt.xlabel(xlabel)
-    plt.xlim(-100,100)
-    plt.ylabel("Probability")
+    plt.xlabel(xlabel,size=30)
+    plt.xlim(-457,83)
+    plt.ylabel("Probability",size=30)
     plt.savefig(setup_dirs.plotsdir()+name+".png")
     plt.close()
     print "histogram complete"
 
-def plot_log_histogram(data,name,xlabel,label1='Stellar Sources',label2='Stellar sources and X-Rays',type='log',filedir='',nobins=100):
+def plot_log_histogram(data,name,xlabel,label1='Stellar Sources',label2='Stellar sources and X-Rays',type='log',filedir='',nobins=90):
     fig = plt.figure()
     ax=plt.gca()
     ax = fig.add_subplot(111)
@@ -253,7 +312,7 @@ def plot_3_log_histograms(dataHI,dataHeI,dataHeII,title,name,xlabel,nobins=5000,
 
 def xfrac_histogram():
     '''plot hisograms'''
-    for i in range(max(1,start),len(redshifts)):
+    for i in range(1,len(redshifts)):#max(1,start),len(redshifts)):
         print redshifts[i]
         xfrac_filename = setup_dirs.path()+'xfrac3d_'+str('%.3f' % redshifts[i]) + '.bin'
         xfrac_HI = c2t.XfracFile(xfrac_filename).xi
@@ -271,12 +330,12 @@ def temp_histrogram():
         data = c2t.TemperFile(temp_filename).temper
         data = data.flatten()
         print len(data), 250**3
-        plot_log_histogram(data,"Temperature","Redshift:" +str('%.3f' % redshifts[i]),"loghist_temper_shortrange_"+str(i+10)+'_'+str('%.3f' % redshifts[i]),"Temperature(K)")
+        plot_log_histogram(data,"loghist_temper_shortrange_"+str(i+10)+'_'+str('%.3f' % redshifts[i]),"Temperature(K)","Redshift:" +str('%.3f' % redshifts[i]),"loghist_temper_shortrange_"+str(i+10)+'_'+str('%.3f' % redshifts[i]),"Temperature(K)")
 
 def dbt_histogram():
-    for i in range(len(redshifts)-26):
+    for i in range(len(redshifts)):
         print "Doing redshift " + str(redshifts[i]) + "..."
-        dbt = IO.readmap("dbt_"+str('%.3f' % redshifts[i]))
+        dbt = IO.readbin("map_dbt_"+str('%.3f' % redshifts[i])+'.bin')
         data = dbt.flatten()
         print "Generating histogram..."
         plot_dbt_histogram(data,"Differential Brightness Temperature, Redshift:" +str('%.3f' % redshifts[i]),"loghist_dbt_shortrange_"+str(i+10)+'_'+str('%.3f' % redshifts[i]),"Differential Brightness Temperature(K)")

@@ -9,14 +9,14 @@ import setup_dirs
 sys.path.append('../../src')
 import c2raytools as c2t
 c2t.set_sim_constants(244)
-plt.rc('xtick', labelsize=24)
-plt.rc('ytick', labelsize=24)
+plt.rc('xtick', labelsize=24)#30)
+plt.rc('ytick', labelsize=24)#30)
 plt.rc('font',family='serif')
-fontsize=24#3dd0
-numberfontsize=24
+fontsize=24#30
+numberfontsize=24#24#30
 tickwidth=1.5
 
-size=24#26
+size=24#30
 lw = 2.5
 
 
@@ -62,9 +62,17 @@ def plot1():
     print "Comparing: " + flag1 + " and "+ flag2    
     minmax = "min"
     #load temperature means
-    data1 = plot_1D.mean('temp_igm','data_'+flag1+'/',redshifts1)
-    data2 = plot_1D.mean('temp_igm','data_'+flag2+'/',redshifts2)
-    print data1
+    #data1 = plot_1D.mean('temp','data_'+flag1+'/',redshifts1)
+    #data2 = plot_1D.mean('temp','data_'+flag2+'/',redshifts2)
+    data1 = np.loadtxt('../generate_data/data_'+flag1+'/mean_temp.dat')
+    data2 = np.loadtxt('../generate_data/data_'+flag2+'/mean_temp.dat')
+    data3 = np.loadtxt('../generate_data/data_'+flag1+'/median_temp.dat')
+    data4 = np.loadtxt('../generate_data/data_'+flag2+'/median_temp.dat')
+    
+#    print data1
+
+    #data3 = plot_1D.median('temp','data_'+flag1+'/',redshifts1)
+    #data3 = plot_1D.median('temp','data_'+flag2+'/',redshifts2)
    
     #load xfrac means
     wstars_xfrac = plot_1D.mean('xfrac','data_'+flag1+'/',redshifts1)
@@ -78,11 +86,12 @@ def plot1():
     if minmax=="max":
         length = min(len(data1),len(data2))
     #print redshifts2 
-    meantemp = np.zeros(2*length).reshape(length,2)
+    meantemp = np.zeros(4*length).reshape(length,4)
     meanxfrac = np.zeros(6*length).reshape(length,6)
     if minmax=="max":
         for i in range(len(data1)):
             meantemp[i,0] = data1[i]
+            meantemp[i,2] = data3[i]
             meanxfrac[i,3] = wstars_xfrac[i]
             meanxfrac[i,4] = wstars_xfracHe1[i]
             meanxfrac[i,5] = wstars_xfracHe2[i]
@@ -92,6 +101,7 @@ def plot1():
             meanxfrac[i,1] = wpls_xfracHe1[i]
             meanxfrac[i,2] = wpls_xfracHe2[i]
             meantemp[i,1] = data2[i]
+            meantemp[i,3] = data4[i]
         #print means[i,1]
     #print redshifts_wstars[i], redshifts_wpls[i]
 #        plot_1D.plot_mean(means,"Temperature","Temperature (K)",'compare_'+flag1+'_'+flag2+'/',redshifts1,redshifts1,label1,label2)
@@ -100,6 +110,8 @@ def plot1():
         for i in range(length):
             meantemp[i,0] = data1[i]
             meantemp[i,1] = data2[i]
+            meantemp[i,2] = data3[i]
+            meantemp[i,3] = data4[i]
 
             meanxfrac[i,0] = wpls_xfrac[i]
             meanxfrac[i,1] = wpls_xfracHe1[i]
@@ -111,8 +123,8 @@ def plot1():
     meanxfrac[0,2]=meanxfrac[0,1]
    
     #print len(redshifts2), len(meantemp[:,1])
-    print meantemp[:,1]
-    print meantemp[:,0]
+#    print meantemp[:,1]
+#    print meantemp[:,0]
 
 
     T0=2.725
@@ -120,42 +132,43 @@ def plot1():
     for z in range(len(redshifts1)):
         Tcmb[z] = T0*(1.0+redshifts1[z])
 
-    size=26
     lw = 2.5
 
     #print np.log10(meanxfrac[:,5])
     f, (ax1, ax2) = plt.subplots(2, figsize=(14,14),sharex=True)
-    #ax1.set_xlim(redshifts2[0],redshifts2[len(redshifts2)-1])
-    ax1.plot(redshifts2[0:length],np.log10(meanxfrac[:,0]),color="Red",label="HII",linewidth=lw)
-    ax1.plot(redshifts2[0:length],np.log10(meanxfrac[:,1]),color="Red",label="HeII",linewidth=lw,linestyle='--')
-    ax1.plot(redshifts2[0:length],np.log10(meanxfrac[:,2]),color="Red",label="HeIII",linewidth=lw,linestyle=':')
-    ax1.plot(redshifts1[0:length],np.log10(meanxfrac[:,3]),color="Blue",label="HII",linewidth=lw)
-    ax1.plot(redshifts1[0:length],np.log10(meanxfrac[:,4]),color="Blue",label="HeII",linewidth=lw,linestyle='--')
-    ax1.plot(redshifts1[0:length],np.log10(meanxfrac[:,5]),color="Blue",label="HeIII",linewidth=lw,linestyle=':')
-    ax1.set_ylabel(r'Ionised Fraction',size=size)
-    ax1.set_ylim(-13.5,0)
+    ax1.set_xlim(redshifts2[1],redshifts2[len(redshifts2)-1])
+    ax1.plot(redshifts2[1:length],np.log10(meanxfrac[1:,0]),color="Red",label="Stellar & X-Ray: HII",linewidth=lw)
+    ax1.plot(redshifts2[1:length],np.log10(meanxfrac[1:,1]),color="Red",label="Stellar & X-Ray: HeII",linewidth=lw,linestyle='--')
+    ax1.plot(redshifts2[1:length],np.log10(meanxfrac[1:,2]),color="Red",label="Stellar & X-Ray: HeIII",linewidth=lw,linestyle=':')
+    ax1.plot(redshifts1[1:length],np.log10(meanxfrac[1:,3]),color="Blue",label="Stellar: HII",linewidth=lw)
+    ax1.plot(redshifts1[1:length],np.log10(meanxfrac[1:,4]),color="Blue",label="Stellar: HeII",linewidth=lw,linestyle='--')
+    ax1.plot(redshifts1[1:length],np.log10(meanxfrac[1:,5]),color="Blue",label="Stellar: HeIII",linewidth=lw,linestyle=':')
+    ax1.set_ylabel(r'Ionised Fraction',size=size+1)
+    ax1.set_ylim(-17.5,0)
     
     ax2.set_ylim(0,800)
-    ax2.plot(redshifts1,Tcmb,label='$T_{cmb}$',color='black',linestyle='--',linewidth=lw)
-    ax2.plot(redshifts1[0:length],meantemp[:,0],color='Blue',label=label1,linewidth=lw)
-    ax2.plot(redshifts2[0:length],meantemp[:,1],color='Red',label=label2,linewidth=lw)
-    ax2.set_ylabel("Temperature [K]",size=size)
-    ax2.set_xlabel("Redshifts",size=size)
+    ax2.plot(redshifts1,Tcmb,label='$T_{cmb}$',color='black',linestyle=':',linewidth=lw)
+    ax2.plot(redshifts1[1:length],meantemp[1:,0],color='Blue',label=label1+' mean',linewidth=lw,linestyle='--')
+    ax2.plot(redshifts2[1:length],meantemp[1:,1],color='Red',label=label2+' mean',linewidth=lw,linestyle='--')
+    ax2.plot(redshifts1[1:length],meantemp[1:,2],color='Blue',label=label1+' median',linewidth=lw)
+    ax2.plot(redshifts2[1:length],meantemp[1:,3],color='Red',label=label2+' median',linewidth=lw)
+    ax2.set_ylabel("Temperature [K]",size=size+1)
+    ax2.set_xlabel("Redshift",size=size+1)
     #ax2.set_ylim(-250,80)
 
     ax1.tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, direction='in',pad=14.0,top='off',right='off')
     ax1.tick_params(axis='both', which='minor', labelsize=numberfontsize, width = tickwidth, length = 5.5, direction='in',pad=14.0,top='off',right='off')
-    ax2.tick_params(axis='both', which='major', width = tickwidth, length = 11,direction='in',top='off',right='off')
-    ax2.tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='in',top='off',right='off')
+    ax2.tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11,direction='in',top='off',right='off')
+    ax2.tick_params(axis='both', which='minor', labelsize=numberfontsize, width = tickwidth, length = 5.5,direction='in',top='off',right='off')
 
 
-   # lg1 = ax1.legend(bbox_to_anchor=(0.04, 0.65), loc=2, borderaxespad=0.,prop={'size':size})
-   # lg1.draw_frame(False)
+    lg1 = ax1.legend(bbox_to_anchor=(0.04, 0.4), loc=2, ncol=2, borderaxespad=0.,prop={'size':size})
+    lg1.draw_frame(False)
     lg = ax2.legend(bbox_to_anchor=(0.04, 0.8), loc=2, borderaxespad=0.,prop={'size':size})
     lg.draw_frame(False)
 
     plt.gcf().subplots_adjust(left=0.2,bottom=0.15)
-    #plt.tight_layout()
+    plt.tight_layout()
     f.subplots_adjust(hspace=0)
 
 
@@ -170,8 +183,8 @@ def plot1():
 #    ax.yaxis.set_tick_params(labelsize=size)
     #lg = plt.legend(bbox_to_anchor=(0.55, 0.97), loc=2,prop={'size':size-1})
     #lg.draw_frame(False)
-    plt.xlim(redshifts2[0],redshifts1[len(redshifts1)-1])
-  #  ax.text(22.7,1100,"(b)",fontsize=size)
+#    plt.xlim(redshifts2[0],redshifts1[len(redshifts1)-1])
+#    ax.text(22.7,1100,"(b)",fontsize=size)
 #
 #    rect = [0.15,0.2,0.55,0.55]
 #    ax1 = add_subplot_axes(ax,rect)
@@ -185,18 +198,18 @@ def plot1():
 #    ax1.plot(redshifts2,np.log10(meanxfrac[:,3]),color="Blue",label="HII",linewidth=lw)
 #    ax1.plot(redshifts2,np.log10(meanxfrac[:,4]),color="Blue",label="HeII",linewidth=lw,linestyle='--')
 #    ax1.plot(redshifts2,np.log10(meanxfrac[:,5]),color="Blue",label="HeIII",linewidth=lw,linestyle=':')
-    ax1.text(22,-2,"(a)",fontsize=size-2)
-    ax2.text(22,700,"(b)",fontsize=size-2)
+    ax1.text(22,-2,"(a)",fontsize=size)
+    ax2.text(22,700,"(b)",fontsize=size)
 #    lg =plt.legend(loc=4,ncol=2,prop={'size':size-3})
 #    lg.draw_frame(False)
 #    plt.ylim(-16,0)
-#    plt.xlim(redshifts2[0],redshifts2[len(redshifts2)-1])
+    #plt.xlim(redshifts2[0],13.221)
  
 
 
-    print "saving as paperplots/plot1.png"
+    print "saving as presenationplots/plot1.png"
     #plt.tight_layout()
-    plt.savefig("paperplots/plot1.png")
+    plt.savefig("presentationplots/plot1.png")
 
 def example2():
     fig = plt.figure(figsize=(15,15))
@@ -204,75 +217,64 @@ def example2():
 
 def plot3():
     length=min(len(redshifts1),len(redshifts2))
-    if length%2!=0:
-        length=length-1
-    wstars=np.zeros(length).reshape(length/2,2)
-    wpls=np.zeros(length).reshape(length/2,2)
-    redshifts_short=np.zeros((length)/2)
+    #if length!=0:
+    #    length=length-1
+    redshifts_short=np.zeros(length)
+    wstars_smooth=np.zeros((length,2))
+    wpls_smooth=np.zeros((length,2))
+    wstars=np.zeros((length,2))
+    wpls=np.zeros((length,2))
 
-    file=open('../generate_data/data_'+flag1+'/mean_dbt.dat')
-    print 'Read mean from ../generate_data/data'+flag1+'/mean_dbt.dat into wstars'
-    i=-1
-    for line in file:
-        if i!=-1 and i<length and i%2==0:
-            wstars[i/2,0]=float(line)
-        i+=1
-    file.close
+#    wstarsnp.loadtxt('../generate_data/data_'+flag1+'/smooth_skewness.dat')
+    wstars_smooth[:,0]=np.loadtxt('../generate_data/data_'+flag1+'/smooth_mean_dbt.dat')
 
-    file=open('../generate_data/data_'+flag2+'/mean_dbt.dat')
-    print 'Read mean from ../generate_data/data_'+flag2+'/mean_dbt.dat into wpls'
-    i=-1
-    for line in file:
-        if i!=-1 and i<length and i%2==0:
-            wpls[i/2,0]=float(line)
-            redshifts_short[i/2]=redshifts2[i]
-        i+=1    
-    file.close
+    wpls_smooth[:,0]=np.loadtxt('../generate_data/data_'+flag2+'/smooth_mean_dbt.dat')
 
-    file=open('../generate_data/data_'+flag1+'/rms.dat')
-    print 'Read mean from ../generate_data/data_'+flag1+'/rms.dat'
-    i=-1
-    for line in file:
-        if i!=-1 and i<length and i%2==0:
-            wstars[i/2,1]=np.sqrt(float(line))
-            print wstars[i/2,1]
-        i+=1
-    file.close
+    wstars_smooth[:,1]=np.loadtxt('../generate_data/data_'+flag1+'/smooth_rms.dat')
 
-    file=open('../generate_data/data_'+flag2+'/rms.dat')
-    print 'Reading mean from ../generate_data/data_'+flag2+'/rms.dat'
-    i=-1
-    for line in file:
-        if i!=-1 and i<length and i%2==0:
-            wpls[i/2,1]=np.sqrt(float(line))
-            print wpls[i/2,1]
-        i+=1
-    file.close
+    wpls_smooth[:,1]=np.loadtxt('../generate_data/data_'+flag2+'/smooth_rms.dat')
+
+
+#    wstars[:,0]=np.loadtxt('../generate_data/data_'+flag1+'/mean_dbt_hightemp.dat')
+    wpls[:,0]=np.loadtxt('../generate_data/data_'+flag2+'/mean_dbt_hightemp.dat')
+
+#    wstars[:,1]=np.loadtxt('../generate_data/data_'+flag1+'/smooth_rmshightemp.dat')
+
+    wpls[:,1]=np.loadtxt('../generate_data/data_'+flag2+'/smooth_rmshightemp.dat')
 
     z=np.zeros(len(redshifts_short))
-    print "plotting..."
-    print wstars[:,0]
-    print wpls[:,0]
-    print redshifts_short
+    print redshifts2
     print "---------------------------------"
+    print wstars[:,0]
+    print "---------------------------------"
+    print wpls[:,0]
+    L=len(redshifts2)-1
     f, (ax1, ax2) = plt.subplots(2, figsize=(15,15),sharex=True) 
-    ax1.set_xlim(redshifts_short[0],redshifts2[len(redshifts2)-1]) 
-    ax1.plot(redshifts_short,z,linewidth=lw,color="Black",linestyle='--')
-    ax1.plot(redshifts_short,wstars[:,0],label=label1,linestyle='-',linewidth=lw,color='Blue')
-    ax1.plot(redshifts_short,wpls[:,0],label=label2,linestyle='-',linewidth=lw,color='Red')
-    ax1.set_ylabel(r'$\bar{\delta T}$ [mK]',size=size)
-    ax2.plot(redshifts_short,wstars[:,1],linestyle='-',linewidth=lw,color='Blue',label=label1)
-    ax2.plot(redshifts_short,wpls[:,1],linestyle='-',linewidth=lw,color='Red',label=label2)
-    ax2.set_ylabel("$\delta$T RMS [mK]",size=size)
-    ax2.set_xlabel("Redshifts",size=size)
+    ax1.set_xlim(redshifts2[1],redshifts2[L]) 
+    ax1.plot(redshifts2,z,linewidth=lw+2,color="Black",linestyle=':')
+#    ax1.plot(redshifts2[0:L:2],wstars[0:L:2,0],linestyle='--',linewidth=lw,color='Blue')
+    ax1.plot(redshifts2[0:L:2],wstars_smooth[0:L:2,0],label=label1,linestyle='-',linewidth=lw,color='Blue')
+    ax1.plot(redshifts2[0:L:2],wpls_smooth[0:L:2,0],label=label2,linestyle='-',linewidth=lw,color='Red')
+    ax1.plot(redshifts2[0:L:2],wpls[0:L:2,0],linestyle='--',linewidth=lw,color='Orange',label='High temperature limit')
+    ax1.set_ylabel(r'$\bar{\delta T}$ [mK]',size=size+1)
+
+#    ax2.plot(redshifts2[0:L:2],wstars[0:L:2,1],linestyle='--',linewidth=lw,color='Blue')
+    ax2.plot(redshifts2[0:L:2],wstars_smooth[0:L:2,1],linestyle='-',linewidth=lw,color='Blue',label=label1)
+    ax2.plot(redshifts2[0:L:2],wpls_smooth[0:L:2,1],linestyle='-',linewidth=lw,color='Red',label=label2)
+    ax2.plot(redshifts2[0:L:2],wpls[0:L:2,1],linestyle='--',linewidth=lw,color='Orange',label='High temperature limit')
+#    ax2.plot(redshifts_short,wpls[:,1],linestyle='--',linewidth=lw,color='p')
+    ax2.set_ylabel("$\delta$T RMS [mK]",size=size+1)
+    ax2.set_xlabel("Redshift",size=size+1)
     #ax2.set_ylim(-250,80)
 
     ax1.tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, direction='in',pad=14.0,top='off',right='off')
     ax1.tick_params(axis='both', which='minor', labelsize=numberfontsize, width = tickwidth, length = 5.5, direction='in',pad=14.0,top='off',right='off')
-    ax2.tick_params(axis='both', which='major', width = tickwidth, length = 11,direction='in',top='off',right='off')
-    ax2.tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='in',top='off',right='off')
+    ax2.tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11,direction='in',top='off',right='off')
+    ax2.tick_params(axis='both', which='minor', labelsize=numberfontsize, width = tickwidth, length = 5.5,direction='in',top='off',right='off')
 
-#    m0 = MultipleLocator(50)
+    ax1.text(14,150,"(a)",fontsize=size)
+    ax2.text(14,275,"(b)",fontsize=size)
+ #m0 = MultipleLocator(50)
 #    ax1.yaxis.set_major_locator(m0)
 #    m0 = MultipleLocator(10)
 #    ax1.yaxis.set_minor_locator(m0)
@@ -297,72 +299,56 @@ def plot3():
  #   ax1.set_yticklabels(labels1,size=size)
     #ax2.set_yticklabels(labels2,size=size)
 #    ax2.set_ylim(0,2400)  
-    ax1.set_ylim(-1500,200)
-
-    lg1 = ax1.legend(bbox_to_anchor=(0.04, 0.65), loc=2, borderaxespad=0.,prop={'size':size})
+    ax1.set_ylim(-298,200)
+    ax2.set_ylim(0,300)
+#    ax1.set_xlim(redshifts2[0],13.221)
+#    ax2.set_xlim(redshifts2[0],13.221)
+    lg1 = ax1.legend(loc=2,prop={'size':size})#(bbox_to_anchor=(0.04, 0.64), loc=2, borderaxespad=0.,prop={'size':size})
     lg1.draw_frame(False)
-    lg = ax2.legend(bbox_to_anchor=(0.04, 0.8), loc=2, borderaxespad=0.,prop={'size':size})
+    lg = ax2.legend(loc=2,prop={'size':size})#(bbox_to_anchor=(0.04, 0.8), loc=2, borderaxespad=0.,prop={'size':size})
     lg.draw_frame(False)
 
     plt.gcf().subplots_adjust(left=0.2,bottom=0.15)
-    #plt.tight_layout()
+    plt.tight_layout()
     f.subplots_adjust(hspace=0)
     plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
-    print "saving fig as paperplots/plot3.png"
-    plt.savefig("paperplots/plot3.png")
+    print "saving fig as presentationplots/plot3.png"
+    plt.savefig("presentationplots/plot3.png")
     
 
 def plot6():
 
     length=min(len(redshifts1),len(redshifts2))
-    if (length%2==0):
-        length=length/2
-    else:
-        length=(length-1)/2
+    L=length-1
     #if length!=0:
     #    length=length-1
-    wstars=np.zeros(length*2).reshape(length,2)
-    wpls=np.zeros(length*2).reshape(length,2)
     redshifts_short=np.zeros(length)
+    wstars_smooth=np.zeros((length,2))
+    wpls_smooth=np.zeros((length,2))
+    wstars=np.zeros((length,2))
+    wpls=np.zeros((length,2))
+
+#    wstarsnp.loadtxt('../generate_data/data_'+flag1+'/smooth_skewness.dat')
+    wstars_smooth[:,0]=np.loadtxt('../generate_data/data_'+flag1+'/smooth_skewness.dat')
+
+    wpls_smooth[:,0]=np.loadtxt('../generate_data/data_'+flag2+'/smooth_skewness.dat')
+
+    wstars_smooth[:,1]=np.loadtxt('../generate_data/data_'+flag1+'/smooth_kurtosis.dat')
+
+    wpls_smooth[:,1]=np.loadtxt('../generate_data/data_'+flag2+'/smooth_kurtosis.dat')
 
 
-    file=open('../generate_data/data_'+flag1+'/skewness.dat')
-    print 'Read mean from ../generate_data/data'+flag1+'/skewness.dat'
-    i=-1
-    for line in file:
-        if i!=-1 and i<length and i%2==0:
-            wstars[i/2,0]=float(line)
-        i+=1
-#        print len(wstars), i, line
+#    wstars[:,0]=np.loadtxt('../generate_data/data_'+flag1+'/skewness.dat')##smooth_skewnesshightemp.dat')
+    wstars[:,0]=np.loadtxt('../generate_data/data_'+flag1+'/smooth_skewnesshightemp.dat')
 
-    file.close
+#    wpls[:,0]=np.loadtxt('../generate_data/data_'+flag2+'/skewness.dat')#smooth_skewnesshightemp.dat')
+    wpls[:,0]=np.loadtxt('../generate_data/data_'+flag2+'/smooth_skewnesshightemp.dat')
 
-    file=open('../generate_data/data_'+flag2+'/skewness.dat')
-    print 'Read mean from ../generate_data/data_'+flag2+'/skewness.dat'
-    i=-1
-    for line in file:
-        if i!=-1 and i<length and i%2==0:
-            wpls[i/2,0]=float(line)
-            redshifts_short[i/2]=redshifts2[i]
-        i+=1
-    file.close
+#    wstars[:,1]=np.loadtxt('../generate_data/data_'+flag1+'/kurtosis.dat')#smooth_kurtosishightemp.dat')
+    wstars[:,1]=np.loadtxt('../generate_data/data_'+flag1+'/smooth_kurtosishightemp.dat')
 
-    file=open('../generate_data/data_'+flag1+'/kurtosis.dat')
-    print 'Read mean from ../generate_data/data_'+flag1+'/kurtosis.dat into wstars'
-    i=-1
-    for line in file:
-        if i!=-1 and i<length and i%2==0:
-            wstars[i/2,1]=float(line)
-        i+=1
-    file.close
-
-    file=open('../generate_data/data_'+flag2+'/kurtosis.dat')
-    print 'Reading mean from ../generate_data/data_'+flag2+'/kurtosis.dat into wpls'
-    i=-1
-    for line in file:
-        if i!=-1 and i<length and i%2==0:
-            wpls[i/2,1]=float(line)
-        i+=1
+#    wpls[:,1]=np.loadtxt('../generate_data/data_'+flag2+'/kurtosis.dat')#smooth_kurtosishightemp.dat')
+    wpls[:,1]=np.loadtxt('../generate_data/data_'+flag2+'/smooth_kurtosishightemp.dat')
 
 
 
@@ -375,24 +361,37 @@ def plot6():
 #        kurtosisdata[i,0] = c2t.statistics.kurtosis(data1)
 #        kurtosisdata[i,1] = c2t.statistics.kurtosis(data2)
     f, (ax1, ax2) = plt.subplots(2,figsize=(15,15), sharex=True)
-    ax1.plot(redshifts_short,wstars[:,0],label=label1,linewidth=lw,linestyle="-",color='Blue')
-    ax1.plot(redshifts_short,wpls[:,0],label=label2,linewidth=lw,linestyle="-",color='Red')
-    ax1.set_ylabel("Skewness",size=size)
-    ax1.set_xlim(redshifts_short[0],redshifts2[len(redshifts2)-1])
-    ax2.plot(redshifts_short,wstars[:,1],label=label1,linewidth=lw,linestyle="-",color='Blue')
-    ax2.plot(redshifts_short,wpls[:,1],label="X-Ray & Stellar",linewidth=lw,linestyle="-",color='Red')
-    ax2.set_ylabel("Kurtosis",size=size)
-    ax2.set_xlabel("Redshift",size=size) 
-  #  ax2.set_ylim(0,19)
+#    ax1.plot(redshifts2[0:L:2],wstars[0:L:2,0],linewidth=lw,linestyle="--",color='Blue')
+    ax1.plot(redshifts2[0:L:2],wstars_smooth[0:L:2,0],label=label1,linewidth=lw,linestyle="-",color='Blue')
+    ax1.plot(redshifts2[0:L:2],wpls_smooth[0:L:2,0],label=label2,linewidth=lw,linestyle="-",color='Red')
+    ax1.plot(redshifts2[0:L:2],wpls[0:L:2,0],linewidth=lw,linestyle="--",color='Orange',label='High temperature limit')
+#    print wpls[:,0]
+#    ax1.plot(redshifts2,wstars[:,0],linewidth=lw,linestyle="--",color='Blue',label="X-Ray & Stellar")
+#    ax1.plot(redshifts2,wpls[:,0],linewidth=lw,linestyle="--",color='Red',label="Stellar")
+    ax1.set_ylabel("Skewness",size=size+1)
+    ax1.set_xlim(redshifts2[0],redshifts2[len(redshifts2)-1])
+    #ax2.plot(redshifts2[0:L:2],wstars[0:L:2,1],linewidth=lw,linestyle="--",color='Blue')
+    ax2.plot(redshifts2[0:L:2],wstars_smooth[0:L:2,1],label=label1,linewidth=lw,linestyle="-",color='Blue')
+    ax2.plot(redshifts2[0:L:2],wpls_smooth[0:L:2,1],label="X-Ray & Stellar",linewidth=lw,linestyle="-",color='Red')
+    ax2.plot(redshifts2[0:L:2],wpls[0:L:2,1],linewidth=lw,linestyle="--",color='Orange',label='High temperature limit')
+ #  ax2.plot(redshifts2,wstars[:,1],linewidth=lw,linestyle="--",color='Blue',label="X-Ray & Stellar")
+ #  ax2.plot(redshifts2,wpls[:,1],linewidth=lw,linestyle="--",color='Red', label="Stellar")
+    ax2.set_ylabel("Kurtosis",size=size+1)
+    ax2.set_xlabel("Redshift",size=size+1) 
+    ax2.set_ylim(-1.,3.4)
   #  ax1.set_ylim(-0.9,2.5)
+#    ax1.set_xlim(redshifts2[0],13.221)
+#    ax2.set_xlim(redshifts2[0],13.221)
 
     ax1.tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, direction='in',pad=14.0,top='off',right='off')
     ax1.tick_params(axis='both', which='minor', labelsize=numberfontsize, width = tickwidth, length = 5.5, direction='in',pad=14.0,top='off',right='off')
-    ax2.tick_params(axis='both', which='major', width = tickwidth, length = 11,direction='in',top='off',right='off')
-    ax2.tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='in',top='off',right='off')
+    ax2.tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11,direction='in',top='off',right='off')
+    ax2.tick_params(axis='both', which='minor', labelsize=numberfontsize, width = tickwidth, length = 5.5,direction='in',top='off',right='off')
 
 
-   # ax1.set_xlim(redshifts_short[0],redshifts2[len(redshifts2)-1])
+    ax1.text(14,1.2,"(c)",fontsize=size)
+    ax2.text(14,3.0,"(d)",fontsize=size)
+ #ax1.set_xlim(redshifts_short[0],redshifts2[len(redshifts2)-1])
   #  ax2.set_xlim(redshifts_short[0],redshifts2[len(redshifts2)-1])
 #    ax2.set_ylim(0,24900)
 #    labels2=["","0$ \ $","5$ \ $","10$ \ $","15$ \ $"]
@@ -401,12 +400,13 @@ def plot6():
 #    ax2.set_yticklabels(labels2,size=size)
 
 
-    #lg = ax1.legend(bbox_to_anchor=(0.4, 0.4),loc=2,prop={'size':size})
-    lg = ax1.legend(loc=3,prop={'size':size})#bbox_to_anchor=(0.5, 1.0),loc=2,prop={'size':size})
+    lg = ax1.legend(loc=2,prop={'size':size})#bbox_to_anchor=(0.13, 0.35),loc=2,prop={'size':size})
+#    lg = ax1.legend(loc=4,prop={'size':size})#bbox_to_anchor=(0.5, 1.0),loc=2,prop={'size':size})
     lg.draw_frame(False)
 
-    #lg2 = ax2.legend(loc=2,prop={'size':size}))#bbox_to_anchor=(0.5, 1.0),loc=2,prop={'size':size})
-    lg2 = ax2.legend(loc=2,prop={'size':size})#bbox_to_anchor=(0.5, 1.0),loc=2,prop={'size':size})
+#    lg2 = ax2.legend(loc=2,prop={'size':size})#bbox_to_anchor=(0.5, 1.0),loc=2,prop={'size':size})
+#   lg2 = ax2.legend(loc=2,prop={'size':size})#bbox_to_anchor=(0.5, 1.0),loc=2,prop={'size':size})
+    lg2 = ax2.legend(loc=2,prop={'size':size})#bbox_to_anchor=(0.13, 1.0),loc=2,prop={'size':size})
     lg2.draw_frame(False)
 
 #    m0 = MultipleLocator(0.5)
@@ -427,26 +427,27 @@ def plot6():
 
 
     plt.gcf().subplots_adjust(left=0.2,bottom=0.15)
+    plt.tight_layout()
 #    ax3.scatter(x, 2 * y ** 2 - 1, color='r')
     # Fine-tune figure; make subplots close to each other and hide x ticks for
     # all but bottom plot.
     f.subplots_adjust(hspace=0)
     plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
-    print "saveing figure as paperplots/plot6"
-    plt.savefig("paperplots/plot6.png")
+    print "saving figure as presentationplots/plot6"
+    plt.savefig("presentationplots/plot6.png")
 
 def plot1b():
 #redshifts4 = [23.268,18.910,15.596,13.733]
     nobins=100
     redshifts_short = np.ones(4).reshape(2,2)
-    redshifts_short[0,0]=22.666
-    redshifts_short[0,1]=18.910
-    redshifts_short[1,0]= 15.360
-    redshifts_short[1,1]=13.733#13.060
+    redshifts_short[0,0]=16.359
+    redshifts_short[0,1]=14.493
+    redshifts_short[1,0]= 13.733
+    redshifts_short[1,1]=13.221
     print redshifts_short.shape
     length=min(len(redshifts1),len(redshifts2))
 
-    f, ax = plt.subplots(2,2, figsize=(13,13),sharex=True,sharey=True)
+    f, ax = plt.subplots(2,2, figsize=(14,14),sharex=True,sharey=True)
     for i in range(2):
         for j in range(2):
             data = np.zeros(2*250**3).reshape(250**3,2)
@@ -462,10 +463,10 @@ def plot1b():
             ax[i,j].hist(np.log10(data[:,0]),weights=weights,bins=10**np.linspace(-1, 0.6, nobins),histtype='stepfilled',color='Red',edgecolor='none',alpha=0.5,label="X-Ray & \n Stellar")
             ax[i,j].text(1.75,0.8,"z = "+str(redshifts_short[i,j]),fontsize=fontsize,color='Purple')
 
-#            ax[i,j].tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, direction='in',pad=14.0,top='off',right='off')
-#            ax[i,j].tick_params(axis='both', which='minor', labelsize=numberfontsize, width = tickwidth, length = 5.5, direction='in',pad=14.0,top='off',right='off')
-#            ax[i,j].tick_params(axis='both', which='major', width = tickwidth, length = 11,direction='in',top='off',right='off')
-#            ax[i,j].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='in',top='off',right='off')
+            ax[i,j].tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11, direction='in',pad=14.0,top='off',right='off')
+            ax[i,j].tick_params(axis='both', which='minor', labelsize=numberfontsize, width = tickwidth, length = 5.5, direction='in',pad=14.0,top='off',right='off')
+            ax[i,j].tick_params(axis='both', which='major', labelsize=numberfontsize, width = tickwidth, length = 11,direction='in',top='off',right='off')
+            ax[i,j].tick_params(axis='both', which='minor', labelsize=numberfontsize, width = tickwidth, length = 5.5,direction='in',top='off',right='off')
 #
            # ax[i,j].set_ylim(0,1)
            # ax[i,j].set_xlim(0,4)
@@ -480,10 +481,10 @@ def plot1b():
 #            m0 = MultipleLocator(10)
 #            ax[i,j].yaxis.set_minor_locator(m0)
 #
-#            m0 = MultipleLocator(0.5)
-#            ax[i,j].xaxis.set_major_locator(m0)
-#            m0 = MultipleLocator(0.1)
-#            ax[i,j].xaxis.set_minor_locator(m0)
+            m0 = MultipleLocator(1.0)
+            ax[i,j].xaxis.set_major_locator(m0)
+            m0 = MultipleLocator(0.5)
+            ax[i,j].xaxis.set_minor_locator(m0)
 #    
 #            m0 = MultipleLocator(2)
 #            ax[i,j].xaxis.set_major_locator(m0)
@@ -496,37 +497,38 @@ def plot1b():
             lg = ax[i,j].legend(bbox_to_anchor=(0.3, 0.75), loc=2, borderaxespad=0.,prop={'size':size})
             lg.draw_frame(False)
 
-    #ax1.set_xlim(redshifts_short[0],redshifts2[len(redshifts2)-1])
-    ax[1,1].set_xlabel('log$_{10}$(Temperature) [K]',size=size)
-    ax[1,0].set_xlabel("log$_{10}$(Temperature) [K]",size=size)
+            ax[i,j].set_xlim(0,3.9)
+            ax[i,j].set_ylim(0,0.95)
+    ax[1,1].set_xlabel('log$_{10}$(T) [K]',size=size)
+    ax[1,0].set_xlabel("log$_{10}$(T) [K]",size=size)
     ax[0,0].set_ylabel("Probability",size=size)
     ax[1,0].set_ylabel("Probability",size=size)
 
-
-#    labels1=["","0.0","","0.2","","0.4","","0.6","","0.8"]
+    ax[0,0].text(22,0.8,"(c)",fontsize=size)
+  #labels1=["","0.0","","0.2","","0.4","","0.6","","0.8"]
 #    labels12=["","0.0","","0.2","","0.4","","0.6","","0.8","","1.0"]
 #    labels2=["","0.0","","1.0","","2.0","","3.0",""]
 #    labels22=["","0.0","","1.0","","2.0","","3.0","","4.0"]
     nolabels=[" "," "," "," "," "," "," "," "," "]
  #   ax[0,0].set_yticklabels(labels12,size=size)
  #   ax[1,0].set_yticklabels(labels1,size=size)
-    ax[1,1].set_yticklabels(nolabels,size=size)
-    ax[0,1].set_yticklabels(nolabels,size=size)
+ ##   ax[1,1].set_yticklabels(nolabels,size=size)
+ ##   ax[0,1].set_yticklabels(nolabels,size=size)
 ##    ax[1,0].set_yticklabels(labels1,size=size)
  #   ax[1,1].set_xticklabels(labels22,size=size)
  #   ax[1,0].set_xticklabels(labels2,size=size)
-    ax[0,0].set_xticklabels(nolabels,size=size)
-    ax[0,1].set_xticklabels(nolabels,size=size)
+ ##   ax[0,0].set_xticklabels(nolabels,size=size)
+ ##   ax[0,1].set_xticklabels(nolabels,size=size)
 
-#    plt.tight_layout()
+    plt.tight_layout()
 #    plt.gcf().subplots_adjust(left=0.2,bottom=0.15)
     f.subplots_adjust(hspace=0,wspace=0)
 #    plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
-    print "saving fig as paperplots/plot2.png"
-    plt.savefig("paperplots/plot1b.png")
+    print "saving fig as presentationplots/plot1b.png"
+    plt.savefig("presentationplots/plot1b.png")
 
 
-plot1()
-#plot1b()
+#plot1()
+plot1b()
 #plot3()
 #plot6()

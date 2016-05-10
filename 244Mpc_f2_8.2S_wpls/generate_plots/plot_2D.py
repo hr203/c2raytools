@@ -8,7 +8,8 @@ import setup_dirs
 
 sys.path.append('../../src/')
 import c2raytools as c2t
-
+c2t.set_sim_constants(244)
+print "boxsize: " + str(c2t.conv.LB)
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
@@ -22,8 +23,8 @@ tickwidth=1.5
 
 redshifts = setup_dirs.read_redshifts()
 nosteps=setup_dirs.nosteps()
-
-ss=121
+FLAG=''#'TEST'
+ss=setup_dirs.get_res()
 start=0
 mesh=250
 maxi = 0
@@ -111,7 +112,7 @@ def plot_scatter_contour(x,y,name,ylabel,xlabel,it,nbins=200):
 #    plt.savefig(setup.plotsdir()+name+"_"+str(it+10)+"_"+str(redshifts[it])+".png")
 
 def plot_lightcone(dataslice,it,label,name,mini,maxi,redshifts,cmap='hot',type='lin'):
-    if name=='dbt' or name=='dbt_lightcone':
+    if name=='dbt' or name=='dbt_lightcone' or name=='smoothed_dbt':
         print "using dbt colourmap"
         cmapdbt = {'red':   ((0.0, 0.0, 0.0),
                             (0.846, 0.0, 1.0),
@@ -127,6 +128,32 @@ def plot_lightcone(dataslice,it,label,name,mini,maxi,redshifts,cmap='hot',type='
                   }
         plt.register_cmap(name='dbtmap',data=cmapdbt)
         cmap = plt.get_cmap('dbtmap')
+
+    if name=='temp_lightcone':
+        maxi =12000#400#13000
+        mini= 0.00
+
+        tcmap = {'green':   ((0.0, 1.0, 1.0),
+                        (0.00, 0.0, 0.0),
+                       (1.0, 0.0, 0.0)),
+    
+                   'blue': ((0.0, 1.0, 1.0),
+                            (0.00,0.0, 0.0),
+                            (1.0, 0.0, 0.0)),
+    
+                   'red':  ((0.0, 1.0, 1.0),
+                            (0.1, 0.1, 0.1),
+    #                        (0.05, 0.0, 0.0),
+                             (1.0, 0.0, 0.0))
+                }
+
+
+        plt.register_cmap(name='cmapt',data=tcmap)
+        cmap = plt.get_cmap('cmapt')
+    if name=='xfrac_lightcone':
+        mini = 0
+        maxi = 1.0
+        #type='log'
 
     fig,axes =plt.subplots(1,1,figsize=(26,6))
     if (type=='lin'):
@@ -155,7 +182,7 @@ def plot_lightcone(dataslice,it,label,name,mini,maxi,redshifts,cmap='hot',type='
                 labels[i/100] = str('%.2f'%redshifts[i])
     labels[len(labels)-2]=str('%.2f'%redshifts[len(redshifts)-2])
     print labels
-    axes.set_xticklabels(labels[::-1])
+    #axes.set_xticklabels(labels[::-1])
     plt.xlabel("z",size=fontsize)
     plt.ylabel("Distance (Mpc)",size=fontsize) 
     fig.subplots_adjust(right=0.85)
@@ -165,18 +192,19 @@ def plot_lightcone(dataslice,it,label,name,mini,maxi,redshifts,cmap='hot',type='
     cbar.set_label("$\delta T_b \ (mK)$",size=fontsize)
 
 #    plt.tight_layout()
-    print "saving as..." + setup_dirs.plotsdir()+name+".png"
-    plt.savefig(setup_dirs.plotsdir()+name+".png")
+    print "saving as..." + setup_dirs.plotsdir()+name+"_stepcell.png"
+    plt.savefig(setup_dirs.plotsdir()+name+"_stepcell.png")
     plt.close()
 
 
 
 def plot(dataslice,it,label,name,mini,maxi,cmap='hot',type='lin'):
     
-    if name=='dbt' or name=='dbt_lightcone_':
+    if name=='dbt' or name=='dbt_lightcone_' or name=='smoothed_dbt':
+        print dataslice
         print "using dbt colourmap"
         cmapdbt = {'red':   ((0.0, 0.0, 0.0),
-                            (0.846, 0.0, 1.0),
+                            (0.84629629629, 0.0, 1.0),
                             (1.0, 1.0, 1.0)),
                    
                    #'green':   ((0.1, 0.1, 0.1),
@@ -184,11 +212,11 @@ def plot(dataslice,it,label,name,mini,maxi,cmap='hot',type='lin'):
                    #         (0.0, 0.0, 0.0)),
     
                    'green': ((0.0, 0.0, 0.0),
-                            (0.846,0.0, 0.0),
+                            (0.84629629629,0.0, 0.0),
                             (1.0, 1.0, 1.0)),
 
                    'blue':  ((0.0, 0.0, 0.0),
-                            (0.846, 1.0, 0.0),
+                            (0.84629629629, 1.0, 0.0),
                             (1.0, 1.0, 1.0))
 
                    #'white': ((0.0, 0.0, 0.0),
@@ -209,6 +237,7 @@ def plot(dataslice,it,label,name,mini,maxi,cmap='hot',type='lin'):
     print mini,maxi
 #    plt.title(str(title) + ", Redshift: " + str(redshifts[it]))
     if (type=='lin'):
+        print "linear"
         im = plt.imshow(dataslice,cmap=cmap,vmin=mini,vmax=maxi,origin='lower')
     else:
         im = plt.imshow(dataslice,cmap=cmap,norm=LogNorm(),vmin=mini,vmax=maxi,origin='lower')
@@ -221,9 +250,9 @@ def plot(dataslice,it,label,name,mini,maxi,cmap='hot',type='lin'):
     if name == "xfracHe2" : 
         plt.text(20,220,"HeIII",fontsize=fontsize,color='white')
         plt.text(150,20,"z = "+str(redshifts[it]),fontsize=fontsize,color='red')
-    if name == "Temperature":
-        plt.text(20,220, "Temperature",fontsize=fontsize,color='white')
-    
+#    if name == "Temperature":
+        #plt.text(20,220, "Temperature",fontsize=fontsize,color='white')    
+
     if name!='dbt':
         print "not dbt..."
         cbar = plt.colorbar(im,orientation='vertical',fraction=0.046,pad=0.04)
@@ -235,6 +264,11 @@ def plot(dataslice,it,label,name,mini,maxi,cmap='hot',type='lin'):
         else:
             cbar.set_ticks([2000,4000,6000,8000,10000,12000,14000])
             cbar.set_ticklabels(['  2  ','  4  ','  6  ','  8  ','  10  $ \ $','  12  ' , '  14   '])
+
+    if FLAG=='TEST':
+        print "Adding resolution to plot"
+        res=10./float(ss)
+        plt.text(0.08*ss,ss-0.15*ss,"Resolution: "+str('%.2f' % res)+ " Mpc/cell",fontsize=fontsize,color="white")
 
     cnv=250.0/244.0
     tick_locs=[0,50*cnv,100*cnv,150*cnv,200*cnv,250*cnv]
@@ -259,7 +293,29 @@ def plottemp():
         maxi = 14300.0
 #        if (i == (len(redshifts)-25)):
  #           maxi = findmax(temperature)/2.0
-        plot(temperature[len(temperature[:,0,0])/2,:,:],i,"Temperature (k K)","Temperature",mini,maxi)
+        if len((temperature[:,0,0])/2)%2==0:
+            plot(temperature[len(temperature[:,0,0])/2,:,:],i,"Temperature (k K)","Temperature",mini,maxi)
+        else:
+            plot(temperature[len(temperature[:,0,0])/2+1,:,:],i,"Temperature (k K)","Temperature",mini,maxi)
+
+
+def blurtemp():
+    for z in range(start,len(redshifts)):
+        print "Doing redshift " + str(redshifts[z])+"..."
+        temp_filename = setup_dirs.path() + 'Temper3D_'+str('%.3f' % redshifts[z]) + '.bin'
+        T = c2t.TemperFile(temp_filename).temper
+        
+        
+        Tb=np.zeros(10**3).reshape(10,10,10)
+        nobins=20
+        for i in range(len(T[:,1,1])):
+            for j in range(len(T[:,1,1])):
+                for k in range(len(T[:,1,1])):
+                    Tb[i/20,j/20,k/20]=Tb[i/20,j/20,k/20]+T[i,j,k]
+        Tb=Tb/20**3
+        IO.writebin(Tb,"tests/blurred/temp_"+str(redshifts[z])+".bin")        
+        print "written to tests/blurred/temp_"+str(redshifts[z])+".bin"
+
 
 def plotdbt():
    
@@ -273,6 +329,22 @@ def plotdbt():
         print np.min(dbt)
         plot(dbt[len(dbt[:,0,0])/2,:,:],i,"$\delta T_b$","dbt",mini,maxi,'seismic')
     print "Complete"    
+
+def plot_smoothed_dbt():
+
+    mini = -457
+    maxi=83
+#    print mini,maxi
+    for i in range(start,len(redshifts)):
+        print "Doing redshift " + str(redshifts[i])+"..."
+        dbt = np.load("../generate_data/"+setup_dirs.resultsdir()+"map_dbt_"+str('%.3f' % redshifts[i])+".bin")
+        dbt = c2t.beam_convolve(dbt[len(dbt[:,0,0])/2,:,:],redshifts[i],244.,beam_w=3.)
+#IO.readmap("dbt_"+str('%.3f' % redshifts[i]))
+#        print np.min(dbt)
+        plot(dbt,i,"$\delta T_b$","smoothed_dbt",mini,maxi,'seismic')
+    print "Complete"
+
+
 
 def plotdbt_lightcone():
 
@@ -318,8 +390,10 @@ def equation_of_state():
         else:
             density_filename='/research/prace/244Mpc_RT/244Mpc_f2_8.2pS_250/coarser_densities/' + str('%.3f' % redshifts[i-i%nosteps-1]) + 'n_all.dat'
             print "density filename: "+ str('%.3f' % redshifts[i-(i)%nosteps-1]) + 'n_all.dat'
-        density = c2t.DensityFile(density_filename).cgs_density.flatten()
-        #density = np.ones(ss**3).reshape(ss,ss,ss)*1.981e-10*(1+redshifts[i])**3
+        if FLAG=='test':
+            density = np.ones(ss**3).reshape(ss,ss,ss)*1.981e-10*(1+redshifts[i])**3
+        else:
+            density = c2t.DensityFile(density_filename).cgs_density.flatten()
         print "Read density file"
         temp_filename = setup_dirs.path() + 'Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
         temperature = c2t.TemperFile(temp_filename).temper.flatten()
@@ -334,12 +408,86 @@ def lightcone():
     maxi=83 
     for i in range(len(filenames)):
         #filenames[i] = setup_dirs.path() + 'lightcone_temp/Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
-        filenames[i-20] = '../generate_data/'+setup_dirs.resultsdir()+'dbt/map_dbt_'+str('%.3f' % redshifts[i]) + '.bin'
-    im,z=c2t.make_lightcone(filenames,redshifts[len(redshifts)-1],redshifts[0]) 
+        filenames[i] = '../generate_data/'+setup_dirs.resultsdir()+'dbt/map_dbt_'+str('%.3f' % redshifts[i]) + '.bin'
+  
+    noreds=10
+    redshifts_many = np.zeros(len(redshifts)*noreds)
+    for i in range(len(redshifts)-1):
+        for j in range(noreds):
+            redshifts_many[i+j]=redshifts[i]-(redshifts[i+1]-redshifts[i])*j/noreds
+    print redshifts_many
+    im,z=c2t.make_lightcone(filenames,redshifts[len(redshifts)-1],redshifts[0],interpolation='step_cell') 
     im=np.asarray(im)
     print(im[125,:,::-1])
     print(im[1,1,1])
-    plot_lightcone(im[125,:,::-1],i,"$\delta$ T","dbt_lightcone",mini,maxi,z,cmap='Blues_r')
+    plot_lightcone(im[125,:,::-1],i,"$\delta$ T [mK]","lightcone_dbt",mini,maxi,z,cmap='Blues_r')
+
+
+def lightcone_temp(rsd=''):
+    filenames = ["" for x in range(len(redshifts))]
+    if rsd!='':
+        vel_files=["" for x in range(len(redshifts)/2)]#]'/research/prace/sph_smooth_cubepm_130329_10_4000_244Mpc_ext2_test/global/so/nc250'+'%.3fv_all.dat'%z for z in redshifts]
+        dens_files=["" for x in range(len(redshifts)/2)]#]'/research/prace/sph_smooth_cubepm_130329_10_4000_244Mpc_ext2_test/global/so/nc250'+'%.3fv_all.dat'%z for z in redshifts]
+#    filenames[0] = len(redshifts)
+    mini = -457
+    maxi=83
+    for i in range(len(filenames)):
+        #filenames[i] = setup_dirs.path() + 'lightcone_temp/Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
+        filenames[i] = filename = setup_dirs.path()+'Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
+        if i%2==0 and rsd!='':
+            vel_files[i/2]='/research/prace/sph_smooth_cubepm_130329_10_4000_244Mpc_ext2_test/global/so/nc250/'+str('%.3f' % redshifts[i])+'v_all.dat'
+            dens_files[i/2]='/research/prace/sph_smooth_cubepm_130329_10_4000_244Mpc_ext2_test/global/so/nc250/%.3fn_all.dat'%redshifts[i]
+    noreds=10
+    redshifts_many = np.zeros(len(redshifts)*noreds)
+    for i in range(len(redshifts)-1):
+        for j in range(noreds):
+            redshifts_many[i+j]=redshifts[i]-(redshifts[i+1]-redshifts[i])*j/noreds
+    print redshifts_many
+    im,z=c2t.make_lightcone(filenames,redshifts[len(redshifts)-1],redshifts[0],interpolation='step_cell')
+    if rsd!='':
+        vel_lightcone, z = c2t.make_velocity_lightcone(vel_files, dens_files)#,redshifts[0], redshifts[len(redshifts)-1])
+        rsd_xfrac = c2t.get_distorted_dt(im, vel_lightcone, z, \
+                              num_particles=30, los_axis=2, velocity_axis=0, \
+                              periodic=False)
+        im=np.asarray(rsd_xfrac)
+        plot_lightcone(im[125,:,::-1],i,"Ionised Fraction","lightcone_rsd_temp",mini,maxi,z,cmap='Blues_r')
+    else:
+        im=np.asarray(im)
+        plot_lightcone(im[125,:,::-1],i,"Temperature [K]","lightcone_temp",mini,maxi,z,cmap='Blues_r')
+
+def lightcone_xfrac(rsd=''):
+    filenames = ["" for x in range(len(redshifts))]
+    if rsd!='':
+        vel_files=["" for x in range(len(redshifts)/2)]#]'/research/prace/sph_smooth_cubepm_130329_10_4000_244Mpc_ext2_test/global/so/nc250'+'%.3fv_all.dat'%z for z in redshifts]
+        dens_files=["" for x in range(len(redshifts)/2)]#]'/research/prace/sph_smooth_cubepm_130329_10_4000_244Mpc_ext2_test/global/so/nc250'+'%.3fv_all.dat'%z for z in redshifts]
+#    filenames[0] = len(redshifts)
+    mini = -457
+    maxi=83
+    for i in range(len(filenames)):
+        #filenames[i] = setup_dirs.path() + 'lightcone_temp/Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
+        filenames[i] = filename = setup_dirs.path()+'xfrac3d_'+str('%.3f' % redshifts[i]) + '.bin'
+        if i%2==0 and rsd!='':
+            vel_files[i/2]='/research/prace/sph_smooth_cubepm_130329_10_4000_244Mpc_ext2_test/global/so/nc250/'+str('%.3f' % redshifts[i])+'v_all.dat'
+            dens_files[i/2]='/research/prace/sph_smooth_cubepm_130329_10_4000_244Mpc_ext2_test/global/so/nc250/%.3fn_all.dat'%redshifts[i]
+    noreds=10
+#    redshifts_many = np.zeros(len(redshifts)*noreds)
+#    for i in range(len(redshifts)-1):
+#        for j in range(noreds):
+#            redshifts_many[i+j]=redshifts[i]-(redshifts[i+1]-redshifts[i])*j/noreds
+    print filenames
+    im,z=c2t.make_lightcone(filenames)#,interpolation='step_cell')
+    if rsd!='':
+        vel_lightcone, z = c2t.make_velocity_lightcone(vel_files, dens_files)#,redshifts[0], redshifts[len(redshifts)-1])
+        rsd_xfrac = c2t.get_distorted_dt(im, vel_lightcone, z, \
+                              num_particles=30, los_axis=2, velocity_axis=0, \
+                              periodic=False)
+        im=np.asarray(rsd_xfrac)
+        plot_lightcone(im[125,:,::-1],i,"Ionised Fraction","lightcone_rsd_xfrac",mini,maxi,z,cmap='Blues_r')
+    else:
+        im=np.asarray(im)
+        plot_lightcone(im[125,:,::-1],i,"Ionised Fraction","lightconexfrac",mini,maxi,z,cmap='Blues_r')
+    
+
 #scatter()
 #plottemp()
 #plotxfrac('')
