@@ -20,10 +20,12 @@ sys.path.append('../')
 import IO 
 
 ss=setup_dirs.get_res()
-start = 0#48#27  
+start =27# 20#48#27  
 redshifts = setup_dirs.read_redshifts()
 c2t.set_verbose(True)
 c2t.set_sim_constants(boxsize_cMpc = 244)
+lc_zs=np.loadtxt('../red_lightcone.dat')#np.load(setup_dirs.resultsdir()+'dbt_lightcone_redshifts.bin')
+
 
 def mean_temp():
     file = open(setup_dirs.resultsdir()+'mean_temp.dat', 'w')
@@ -34,26 +36,24 @@ def mean_temp():
     file.close()
     print "Written mean Temperature to "+setup_dirs.resultsdir()+'mean_temp.dat'
 
-def mean_dbt():
-    file=open(setup_dirs.resultsdir()+'mean_dbt.dat', 'w')
-    for i in range(len(redshifts)):
-        filename = setup_dirs.resultsdir()+'map_dbt_'+str('%.3f' % redshifts[i]) + '.bin'
+def mean_dbt(id='',ht=''):
+    rds=redshifts
+    if id=='smooth_':
+         rds=lc_zs
+    file=open(setup_dirs.resultsdir()+id+'mean_dbt'+ht+'.dat', 'w')
+    for i in range(len(rds)):
+        if id=='':
+            filename = setup_dirs.resultsdir()+'map_dbt_'+ht+str('%.3f' % rds[i]) + '.bin'
+        else:
+            if ht!='': 
+                filename = setup_dirs.resultsdir()+'smoothed_map_dbt'+ht+str('%.3f' % rds[i]) + '.bin'
+            else:
+                filename = setup_dirs.resultsdir()+'smoothed_map_dbt'+ht+'_'+str('%.3f' % rds[i]) + '.bin'
         data = np.load(filename)
         file.write(str(np.mean(data)) + '\n')
         print np.mean(data) 
     file.close()
-    print "Written mean Temperature to "+setup_dirs.resultsdir()+'mean_dbt.dat'
-
-def mean_dbt_smooth():
-    file=open(setup_dirs.resultsdir()+'smooth_mean_dbt.dat', 'w')
-    for i in range(len(redshifts)):
-        filename = setup_dirs.resultsdir()+'smoothed_map_dbt_'+str('%.3f' % redshifts[i]) + '.bin'
-        data = np.load(filename)
-        file.write(str(np.mean(data)) + '\n')
-        print np.mean(data)
-    file.close()
-    print "Written mean Temperature to "+setup_dirs.resultsdir()+'smooth_mean_dbt.dat'
-
+    print "Written mean Temperature to "+setup_dirs.resultsdir()+id+'mean_dbt'+ht+'.dat'
 
 def median_temp():
     file = open(setup_dirs.resultsdir()+'median_temp.dat', 'w')
@@ -179,77 +179,122 @@ def power_spectrum(id=''):
         IO.write2data(powerspec[0],powerspec[1],setup_dirs.resultsdir()+'/powerSpectra_100b_'+id+str('%.3f' % redshifts[i])+'.dat',setup_dirs.resultsdir()+'/powerSpectraFrequencies_dbt_100b_'+str('%.3f' % redshifts[i])+'.dat')
     #    IO.writedata(powerspec[1],'data/powerSpectraFrequencies_'+str('%.3f' % redshifts[i])+'.dat')
 
-def rms():
-    file = open(setup_dirs.resultsdir()+'rms.dat','w')
-#    file2 = open(setup_dirs.resultsdir()+'rms_density.dat','w')
-    for i in range(len(redshifts)):
-        print "Doing redshift: " + str(redshifts[i])
-        print "opening "+setup_dirs.resultsdir()+"map_dbt_"+str('%.3f' % redshifts[i])+".bin"
-        data=np.load(setup_dirs.resultsdir()+"map_dbt_"+str('%.3f' % redshifts[i])+".bin")
+def rms(s='',ht=''):
+    file = open(setup_dirs.resultsdir()+s+'_'+'rms'+'_'+ht+'coeval.dat','w')
+    rds=redshifts
+    for i in range(len(rds)):
+        print "Doing redshift: " + str(rds[i])
+        if s=='':
+            print "opening "+setup_dirs.resultsdir()+"map_dbt_"+ht+str('%.3f' % rds[i])+".bin"
+            data=np.load(setup_dirs.resultsdir()+"map_dbt_"+ht+str('%.3f' % rds[i])+".bin")
+        else:
+            if ht!='':
+                print "opening "+setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % rds[i])+".bin"
+                data=np.load(setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % rds[i])+".bin")
+            else:
+                print "opening "+setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % rds[i])+".bin"
+                data=np.load(setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % rds[i])+".bin")
+                 
         mean=np.mean(data)
         print "mean dbt: " + str(mean)
-        length=len(data)
+        length=len(data.flatten())
         rmsdata=0.0
         print  "summing..."
-#        for x in range(length):
-#            for y in range(length):
-#                for z in range(length):
-#                    rmsdata=rmsdata+(data[x,y,z]-mean)**2
-#                    #rmsdata=rmsdata+(data[x,y,z])**2
         rmsdata=np.sum((data-mean)**2)
-        rmsdata=np.sqrt(rmsdata/length**3)
+        rmsdata=np.sqrt(rmsdata/length)
         print rmsdata, np.sqrt(np.var(data)) 
         #rmsdata=(rmsdata/length**3)
         file.write(str(rmsdata)+'\n')
         print(str(rmsdata)+'\n')
-    print "Written rms to " + setup_dirs.resultsdir()+" rms.dat"
+    print "Written rms to " + setup_dirs.resultsdir()+s+" rms"+ht+"coveal.dat"
 
-def smooth_rms(id=''):
-    file = open(setup_dirs.resultsdir()+'smooth_rms'+id+'.dat','w')
+def lightcone_stats(s='',ht=''):
+    infile = setup_dirs.resultsdir()+'dbt_lightcone_smooth'+ht+'.bin'
+    zfile = open(setup_dirs.resultsdir()+'dbt_lightcone_redshifts.bin','rb')
+    meanfile = open(setup_dirs.resultsdir()+s+'_'+'mean'+'_'+ht+'lightcone.dat','w')
+    skewnessfile = open(setup_dirs.resultsdir()+s+'_'+'skewness'+'_'+ht+'lightcone.dat','w')
+    kurtosisfile = open(setup_dirs.resultsdir()+s+'_'+'kurtosis'+'_'+ht+'lightcone.dat','w')
+    rmsfile = open(setup_dirs.resultsdir()+s+'_'+'rms'+'_'+ht+'lightcone.dat','w')
+    redshiftfile = open(setup_dirs.resultsdir()+s+'_'+'zs'+'_'+ht+'.dat','w')
+    lc = np.load(infile)
+    zs = np.load(zfile)
+    ratio=4. #smoothing ratio
+    Lbox=244./0.7 #boxsize in cMpc
+    SLbox=Lbox/ratio #size of smoothing box
+    Nbox=250 #number of cells
+    SNbox=int(Nbox/ratio)+1 #new number of cells
+    print Lbox, SLbox, Nbox, SNbox
+    for i in range(len(zs)-SNbox/2-2,SNbox/2,-1):
+        mapfile=setup_dirs.resultsdir()+s+'_map_'+ht+str('%.3f'%zs[i])+'.bin'
+        print "Doing redshift: " + str(zs[i])
+        data,dims = c2t.get_lightcone_subvolume(lc,zs,zs[i],depth_mpc=SLbox,subtract_mean=False)
+        IO.writebin(data,mapfile)
+        redshiftfile.write(str(zs[i])+'\n')
+        meanfile.write(str(np.mean(data))+'\n')
+        rmsfile.write(str(np.sqrt(np.var(data)))+'\n')
+        skewnessfile.write(str(c2t.statistics.skewness(data.flatten()))+'\n')
+        kurtosisfile.write(str(c2t.statistics.kurtosis(data.flatten()))+'\n')
+    print "Written statistics"
+
+def coeval_stats(s='smooth',ht=''):
+    skewnessfile = open(setup_dirs.resultsdir()+s+'_'+'skewness'+'_'+ht+'coeval.dat','w')
+    kurtosisfile = open(setup_dirs.resultsdir()+s+'_'+'kurtosis'+'_'+ht+'coeval.dat','w')
+    rmsfile = open(setup_dirs.resultsdir()+s+'_'+'rms'+'_'+ht+'coeval.dat','w')
     for i in range(len(redshifts)):
+        infile = setup_dirs.resultsdir()+'smooth_coevalmap_dbt_'+ht+str('%.3f'%redshifts[i]+'.bin')
+        data = np.load(infile)
         print "Doing redshift: " + str(redshifts[i])
-        print "opening "+setup_dirs.resultsdir()+"smoothed_map_dbt_"+id+str('%.3f' % redshifts[i])+".bin"
-        data=np.load(setup_dirs.resultsdir()+"smoothed_map_dbt_"+id+str('%.3f' % redshifts[i])+".bin")
-        mean=np.mean(data)
-        print "mean dbt: " + str(mean)
-        length=len(data)
-        rmsdata=0.0
-        print  "summing..."
-        for x in range(length):
-            for y in range(length):
-#                for z in range(length):
-		#rmsdata=rmsdata+(data[x,y]-mean)**2
-                rmsdata=rmsdata+(data[x,y])**2
-        rmsdata=np.sqrt(rmsdata/length**2)
-        #rmsdata=(rmsdata/length**2)
-        file.write(str(rmsdata)+'\n')
-        print(str(rmsdata)+'\n')
-    print "Written rms to " + setup_dirs.resultsdir()+"smooth_rms"+id+".dat"
+        rmsfile.write(str(np.sqrt(np.var(data)))+'\n')
+        skewnessfile.write(str(c2t.statistics.skewness(data.flatten()))+'\n')
+        kurtosisfile.write(str(c2t.statistics.kurtosis(data.flatten()))+'\n')
+    print 'written to ' + setup_dirs.resultsdir()+s+'_'+'rms'+'_'+ht+'coeval.dat' 
+    print 'written to ' + setup_dirs.resultsdir()+s+'_'+'skewness'+'_'+ht+'coeval.dat'
+    print 'written to ' + setup_dirs.resultsdir()+s+'_'+'kurtosis'+'_'+ht+'coeval.dat'
+
  
-def skewness():
-    file = open(setup_dirs.resultsdir()+'skewness.dat','w')
+def skewness(s='',ht=''):
+    file = open(setup_dirs.resultsdir()+s+'_skewness_'+ht+'coeval.dat','w')
     for i in range(len(redshifts)):
         print "Doing redshift: " + str(redshifts[i])
-        print setup_dirs.resultsdir()+"map_dbt_"+str('%.3f' % redshifts[i])+".bin"
-        data=np.load(setup_dirs.resultsdir()+"map_dbt_"+str('%.3f' % redshifts[i])+".bin")
+        if s=='':
+            print "opening "+setup_dirs.resultsdir()+"map_dbt_"+ht+str('%.3f' % redshifts[i])+".bin"
+            data=np.load(setup_dirs.resultsdir()+"map_dbt_"+ht+str('%.3f' % redshifts[i])+".bin")
+        else:
+            if ht!='':
+                print "opening "+setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % redshifts[i])+".bin"
+                data=np.load(setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % redshifts[i])+".bin")
+            else:
+                print "opening "+setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % redshifts[i])+".bin"
+                data=np.load(setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % redshifts[i])+".bin")
         data=data.flatten()
-        print scipy.stats.skew(data), c2t.statistics.skewness(data)
+#        print scipy.stats.skew(data), c2t.statistics.skewness(data)
         #skewness=scipy.stats.skew(data)        
         skewness=c2t.statistics.skewness(data)
 
         file.write(str(skewness)+'\n')
-    print "Written skewness to " + setup_dirs.resultsdir()+"skewness.dat"
+    print "Written skewness to " + setup_dirs.resultsdir()+s+"skewness"+ht+"coeval.dat"
 
-def kurtosis():
-    file = open(setup_dirs.resultsdir()+'kurtosis.dat','w')
-    for i in range(len(redshifts)):
-        print "Doing redshift: " + str(redshifts[i])
-        data=np.load(setup_dirs.resultsdir()+"map_dbt_"+str('%.3f' % redshifts[i])+".bin")
+def kurtosis(s='',ht=''):
+    file = open(setup_dirs.resultsdir()+s+'_kurtosis_'+ht+'_coeval.dat','w')
+    rds=redshifts
+
+    for i in range(len(rds)):
+        print "Doing redshift: " + str(rds[i])
+        if s=='':
+            print "opening "+setup_dirs.resultsdir()+"map_dbt_"+ht+str('%.3f' % rds[i])+".bin"
+            data=np.load(setup_dirs.resultsdir()+"map_dbt_"+ht+str('%.3f' % rds[i])+".bin")
+        else:
+            if ht!='':
+                print "opening "+setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % rds[i])+".bin"
+                data=np.load(setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % rds[i])+".bin")
+            else:
+                print "opening "+setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % rds[i])+".bin"
+                data=np.load(setup_dirs.resultsdir()+"smooth_coevalmap_dbt_"+ht+str('%.3f' % rds[i])+".bin")
         data=data.flatten()
 #        kurtosis=scipy.stats.kurtosis(data)
         kurtosis=c2t.statistics.kurtosis(data)
         file.write(str(kurtosis)+'\n')
-    print "Written kurtosis to " + setup_dirs.resultsdir()+"kurtosis.dat"
+    print "Written kurtosis to " + setup_dirs.resultsdir()+s+"kurtosis"+ht+"coeval.dat"
 
 
 

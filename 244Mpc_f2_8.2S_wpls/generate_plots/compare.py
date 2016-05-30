@@ -12,11 +12,13 @@ from matplotlib.ticker import MultipleLocator
 from matplotlib.font_manager import FontProperties
 from matplotlib import rcParams
 import matplotlib.gridspec as gridspec
-mpl.rc('xtick', labelsize=15)#30)
-mpl.rc('ytick', labelsize=15)#30)
+import matplotlib.cm as cm
+
+mpl.rc('xtick', labelsize=16)#30)
+mpl.rc('ytick', labelsize=16)#30)
 mpl.rc('font',family='serif')
-fontsize=15
-numberfontsize=15
+fontsize=16
+numberfontsize=16
 tickwidth=1.5
 
 lw=2.5
@@ -35,8 +37,11 @@ results_dir='/lustre/scratch/astro/hr203/RESULTS/244Mpc_f2_8.2S_H250_wstars'
 #redshifts_wqs = setup_dirs.read_redshifts('wquasars')
 start=0
 
+
 flag1='wstars'
-flag2='wpls'#'wquasars'
+flag2='wpls'#'wquasars'#''wpls'
+#flag2='wquasars_wpls'#'wstars'
+#flag1='wpls'#'wquasars'
 
 redshifts1=setup_dirs.read_redshifts(flag1)
 redshifts2=setup_dirs.read_redshifts(flag2)
@@ -46,18 +51,19 @@ redshifts2=setup_dirs.read_redshifts(flag2)
 ##redshifts4 = [14.912,14.294,13.733,13.557]
 #redshifts4 = [14.294,13.733,13.221,12.751]#11.918]
 #if flag2=='wpls' or flag2=='wquasars':
-redshifts4 = [19.705,15.841,14.912,14.294]
+#redshifts4 = [18.910,15.841,14.912,14.294]
+redshifts4 = [18.914,15.837,14.908,14.293]
 
 
 if flag1=='wstars'or flag2=='wstars':
     label1="Stellar"        
 if flag1=='wpls'or flag2=='wpls':
     if flag1 =='wstars' or flag2=='wstars':
-        label2="X-Ray & Stellar"
+        label2="X-ray & Stellar"
     else:
-        label1="X-Ray and Stellar"
+        label1="X-ray and Stellar"
     if flag2=='wquasars_wpls':
-        label2="X-Ray & Quasar"
+        label2="X-ray & Quasar"
 if flag1=='wquasars' or flag2=='wquasars':
     label2="Quasar and Stellar"
 
@@ -276,18 +282,12 @@ def compare_mean_xfrac():
 
 
 def mjfFormatter(x,pos):
-    conv=244.0/125.0#250.0
+    conv=244.0/125#250.0
     x = int(conv*x)
-    if x!=100 and x!=199 and x!=0:
+    if x!=100 and x!=199 and x!=200 and x!=0:
         x = ''
     if x==199:
         x=x+1
-#    if x==0:
-    #    print "x=0"
- #       x=0
-    #if x == 1:
-    #    print "x=1"
-    #    x=0
     return x #"{0:.0f}".format(x)
 
 def compare_hisograms_temperature():
@@ -322,17 +322,15 @@ def compare_dbtmaps(id=''):
 
     plt.register_cmap(name='dbtmap',data=cmapdbt)
 
-    mini = -300#457
-    maxi=50#83
+    mini = -280#457
+    maxi=83
     if flag1=='wpls' or flag2=='wpls' or flag2=="wquasars":
-        redshifts = redshifts4#[22.100,15.132,13.557,12.751]
-#        redshifts = redshifts4#[22.100,16.359,15.841,15.132]
+        #redshifts = [22.100,15.132,13.557,12.751]
+        redshifts = redshifts4#[22.100,16.359,15.841,15.132]
     else:
         redshifts = redshifts4#[14.294,13.733,12.603,11.546]
 
     fig, axes = plt.subplots(2,len(redshifts),figsize=(13,6))
-    #fig.text(0.5,0.02,"Distance (Mpc)",ha='center',va='center',fontsize=fontsize)
-    #fig.text(0.06,0.55,"Distance (Mpc)",ha='center',va='center',rotation='vertical',fontsize=fontsize)
     plt.gcf().subplots_adjust(right=0.15)
 #    plt.gcf().subplots_adjust(bottom=0.15)
     plt.subplots_adjust(left=None,bottom=None,right=None,top=None,wspace=0.05,hspace=0.01)
@@ -346,7 +344,8 @@ def compare_dbtmaps(id=''):
         f1.close()
         print np.shape(dbt_wpls)
         if id=='smoothed':
-            im = axes[0,i].imshow(dbt_wpls,cmap='gist_heat',vmin=mini,vmax=maxi,origin='lower')#,interpolation='nearest')
+            im = axes[0,i].imshow(dbt_wpls,cmap='hot',vmin=mini,vmax=maxi,origin='lower')#,interpolation='nearest')
+            #im = axes[0,i].imshow(dbt_wpls,cmap='YlOrRd_r',vmin=mini,vmax=maxi,origin='lower')#,interpolation='nearest')
 #            axes[0,i].text(
         else:
             im = axes[0,i].imshow(dbt_wpls[len(dbt_wpls[1,1,:])/2,:,:],cmap='dbtmap',vmin=mini,vmax=maxi,origin='lower')#,interpolation='nearest')
@@ -356,8 +355,8 @@ def compare_dbtmaps(id=''):
             c=299792458.
             bw=wl/(2.e3) #radians
             bw = bw*3437.74677#arcminutesi
-            axes[0,i].text(10,110,"z = "+str('%.2f'%redshifts[i])+", bw = "+str('%.1f'%bw)+ "'",size=fontsize-2,color='Black',backgroundcolor="white")
-            axes[1,i].text(10,110,"z = "+str('%.2f'%redshifts[i])+", bw = "+str('%.1f'%bw)+ "'",size=fontsize-2,color='Black',backgroundcolor="white")
+            axes[0,i].text(5,135,"z = "+str('%.1f'%redshifts[i])+", fwhm = "+str('%.1f'%bw)+ "'",size=fontsize-2,color='Black',backgroundcolor="white")
+            #axes[1,i].text(5,54,"z = "+str('%.2f'%redshifts[i])+", bw = "+str('%.1f'%bw)+ "'",size=fontsize-2,color='Black',backgroundcolor="white")
         else:
             axes[0,i].text(20,270,"z = "+str('%.2f'%redshifts[i]),size=fontsize,color='Black')
 #        dbt_wstars= IO.readbin("dbt_"+str('%.3f' % redshifts[i]),'data_'+flag1+'/')
@@ -373,9 +372,9 @@ def compare_dbtmaps(id=''):
 
     fig.subplots_adjust(right=0.85)
     cbar_ax = fig.add_axes([0.87, 0.15, 0.01, 0.7])
-    cbar = fig.colorbar(im, cax=cbar_ax,ticks=[-400,-300,-200,-100,0,100,200,300])
+    cbar = fig.colorbar(im, cax=cbar_ax,ticks=[-200,-150,-100,-50,0,50])
     cbar.ax.set_yticklabels
-    cbar.set_label("$\delta T_b \ (mK)$",size=fontsize)
+    cbar.set_label("$\delta T_b \ (\mathrm{mK})$",size=fontsize)
 
     #cbar_ax = fig.add_axes([0.87,0.54,0.03,0.35])
     #cbar = fig.colorbar(im,cax=cbar_ax,ticks=[-300,-150,0, 150, 300])
@@ -399,7 +398,7 @@ def compare_dbtmaps(id=''):
                 axes[i,j].xaxis.set_minor_locator(m0)
 
     axes[0,0].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off',bottom='off')
-    axes[0,0].set_ylabel("X-Ray & Stellar",fontsize=numberfontsize-1)
+    axes[0,0].set_ylabel("X-ray & Stellar",fontsize=numberfontsize-1)
     axes[0,1].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off',bottom='off',left='off')
     axes[1,0].set_ylabel("Stellar",fontsize=numberfontsize-1)
     axes[0,2].tick_params(axis='both', which='minor', width = tickwidth, length = 5.5,direction='out',top='off',right='off',bottom='off',left='off')
@@ -425,14 +424,14 @@ def compare_dbtmaps(id=''):
 #########################################################################
 def compare_xfracmaps(id):
     maxi = 0.0
-    mini= -4.00
+    mini= -8.#4.00
 
     if flag1=='wpls' or flag2=='wpls' or flag2=='wquasars':
         #redshifts = [14.912,14.294,13.733,13.557]
-        redshifts = redshifts4#[22.100,16.359,15.841,15.132]
+        redshifts = [22.100,16.359,14.294,12.751]
     else:
         #redshifts = [14.294,13.733,13.221,11.918]
-        redshifts = redshifts4#[22.100,16.359,15.841,15.132]
+        redshifts = [22.100,16.359,14.294,12.175]
 
     fig, axes = plt.subplots(2,len(redshifts),figsize=(14,6))
 
@@ -455,7 +454,7 @@ def compare_xfracmaps(id):
         dbt_wstars = c2t.XfracFile(xfrac_filename).xi
         axes[1,i].imshow(np.log10(dbt_wstars[250/2,:,:]),cmap='Blues_r',vmin=mini,vmax=maxi,origin='lower',interpolation='nearest')
 
-    fig.subplots_adjust(right=0.95)
+    fig.subplots_adjust(right=0.85)
     cbar_ax = fig.add_axes([0.87, 0.15, 0.01, 0.7])
     cbar = fig.colorbar(im, cax=cbar_ax,ticks=[-14,-12,-10,-8,-6,-4,-2,0])
     cbar.ax.set_yticklabels
@@ -679,15 +678,15 @@ def compare_dbt_lightcones():
     axes[1].set_xticklabels(labels)
     axes[0].set_xticklabels([])
     plt.xlabel("Redshift",size=fontsize)
-    fig.text(0.08,0.65,"Distance [Mpc]\n",ha='center',fontsize=fontsize,rotation='vertical',color='black')
+    fig.text(0.08,0.65,"Position [Mpc\h]\n",ha='center',fontsize=fontsize,rotation='vertical',color='black')
     plt.tight_layout()
-    fig.subplots_adjust(right=0.85)
+    fig.subplots_adjust(right=0.95)
     cbar_ax = fig.add_axes([0.87, 0.25, 0.02, 0.5])
     cbar = fig.colorbar(im1, cax=cbar_ax,ticks=[-400,-300,-200,-100,0,100,200,300])
     cbar.ax.set_yticklabels
     cbar.set_label("$\mathrm{\delta T_b \ [mK]}$",size=fontsize)
 #    plt.tight_layout()
-    plt.gcf().subplots_adjust(left=0.15)
+#    plt.gcf().subplots_adjust(left=0.15)
     print "saving as..." +"compare_"+flag1+"_"+flag2+"/lightcone_dbt.png"
     plt.savefig("compare_"+flag1+"_"+flag2+"/lightcone_dbt.png")
     #plt.savefig("paperplots/plot4.png")
@@ -800,7 +799,7 @@ def compare_temp_lightcones():
     axes[0].set_xticklabels([])
     plt.xlabel("Redshift",size=fontsize)
     #plt.ylabel("Distance (Mpc)",size=fontsize)
-    fig.text(0.08,0.65,"Distance [Mpc]\n",ha='center',fontsize=fontsize,rotation='vertical')
+    fig.text(0.08,0.65,"Position [Mpc/h]\n",ha='center',fontsize=fontsize,rotation='vertical')
     plt.tight_layout()
     fig.subplots_adjust(right=0.95)
     cbar_ax = fig.add_axes([0.87, 0.25, 0.02, 0.5])
@@ -815,17 +814,17 @@ def compare_temp_lightcones():
     #plt.savefig("paperplots/temp_lightcone.png")
     plt.close()
 
-def compare_xfrac_lightcones():
+def compare_xfrac_lightcones(id=''):
     length=min(len(redshifts1),len(redshifts2))
     filenames1 = ["" for x in range(length)]
     filenames2 = ["" for x in range(length)]
 #    filenames[0] = len(redshifts)
-    mini = 1e-4 
+    mini = 1e-8#1e-4 
     maxi=1
     for i in range(length):
         #filenames[i] = setup_dirs.path() + 'lightcone_temp/Temper3D_'+str('%.3f' % redshifts[i]) + '.bin'
-        filenames1[i] = '/lustre/scratch/astro/hr203/RESULTS/244Mpc_f2_8.2S_H250_'+flag1+'/xfrac3d_'+str('%.3f' % redshifts1[i]) + '.bin'
-        filenames2[i] ='/lustre/scratch/astro/hr203/RESULTS/244Mpc_f2_8.2S_H250_'+flag2+'/xfrac3d_'+str('%.3f' % redshifts2[i]) + '.bin'
+        filenames1[i] = '/lustre/scratch/astro/hr203/RESULTS/244Mpc_f2_8.2S_H250_'+flag1+'/xfrac3d'+id+'_'+str('%.3f' % redshifts1[i]) + '.bin'
+        filenames2[i] ='/lustre/scratch/astro/hr203/RESULTS/244Mpc_f2_8.2S_H250_'+flag2+'/xfrac3d'+id+'_'+str('%.3f' % redshifts2[i]) + '.bin'
     print "Filenames:"
     print filenames1
     print filenames2
@@ -916,19 +915,19 @@ def compare_xfrac_lightcones():
     axes[0].set_xticklabels([])
     plt.xlabel("Redshift",size=fontsize)
     #plt.ylabel("Distance (Mpc)",size=fontsize)
-    fig.text(0.08,0.65,"Distance [Mpc]\n",ha='center',fontsize=fontsize,rotation='vertical')
+    fig.text(0.08,0.65,"Position [Mpc/h]\n",ha='center',fontsize=fontsize,rotation='vertical')
     plt.tight_layout()
     fig.subplots_adjust(right=0.95)
     cbar_ax = fig.add_axes([0.87, 0.25, 0.02, 0.5])
     cbar = fig.colorbar(im1, cax=cbar_ax,ticks=[1e-10,1e-8,1e-6,1e-4,1e-2,1e0])
     cbar.ax.set_yticklabels
-    cbar.set_label("$\mathrm{Ionised Fraction}$",size=fontsize)
+    cbar.set_label("$\mathrm{log(x_v)}$",size=fontsize)
 
 #    plt.tight_layout()
     #plt.gcf().subplots_adjust(bottom=0.15,left=0.15)
-    print "saving as..." +"compare_"+flag1+"_"+flag2+"/lightcone_xfrac.png"
-    plt.savefig("compare_"+flag1+"_"+flag2+"/lightcone_xfrac.png")
-#    plt.savefig("paperplots/xfrac_lightcone.png")
+    print "saving as..." +"compare_"+flag1+"_"+flag2+"/lightcone_xfrac"+id+".png"
+    plt.savefig("compare_"+flag1+"_"+flag2+"/lightcone_xfrac"+id+".png")
+#    plt.savefig("paperplots/xfrac"+id"_lightcone.png")
     plt.close()
 
 
@@ -1022,16 +1021,52 @@ def compare_ps(id='100b'):
     print "saving as paperplots/plot3b.png..."
     plt.savefig("compare_"+flag1+"_"+flag2+"/powerspectra"+str(id)+".png")  
 
+def highT_ps(id='100b'):
+    ''' plotmap.plotdbt() '''
+    fsize=30
+    rcParams['xtick.direction'] = 'in'
+    rcParams['ytick.direction'] = 'in'
+
+    cmin=0
+    cmax=len(redshifts1)-6
+    norm=mpl.colors.Normalize(vmin=cmin,vmax=cmax)
+    m=cm.ScalarMappable(norm=norm,cmap='brg_r')
+
+
+    fig,axes =plt.subplots(1,1,figsize=(15,15),sharex=True,sharey=True)
+    for i in range(4,len(redshifts1)-6,6):
+        print "Doing redshift: " +str(redshifts1[i])
+        data3=np.loadtxt('../generate_data/data_'+flag2+"/powerSpectra_"+id+"_hightemp"+str('%.3f' % redshifts1[i])+".dat")
+        fr=np.loadtxt('../generate_data/data_'+flag2+"/powerSpectraFrequencies_dbt_"+id+"_"+str('%.3f' % redshifts1[i])+".dat")
+
+        ps3=data3*fr**3./(4.*np.pi**2.)
+        ps3=np.sqrt(ps3)
+
+        axes.plot(np.log10(fr),np.log10(ps3),label="z: "+str('%.3f'%redshifts1[i]),color=m.to_rgba(i),linewidth=lw,alpha=0.5)
+        axes.set_xlim(-1.25,1.)
+        axes.tick_params(labelsize=numberfontsize)
+        axes.set_ylim(-0.5,0.6)
+
+    axes.set_ylabel("log$_10$($\Delta_{21cm}$)  [mK] ",size=fsize)
+    axes.set_xlabel("log$_{10}$(k) [h Mpc$^{-1}$]",size=fsize)
+
+    lg = axes.legend(loc=4,prop={'size':fsize-2})
+    lg.draw_frame(False)
+    plt.tight_layout()
+    fig.subplots_adjust(hspace=0, wspace=0)
+    print "saving as paperplots/plot3b.png..."
+    plt.savefig("highT_lin_powerspectra"+str(id)+".png")
+
 
 def plot_dbt_histogram():
+    lc_zs=redshifts1#e.loadtxt('../generate_data/data_wstars/smooth_zs_hightemp.dat')
+    for i in range(len(lc_zs)):
+        print "Doing redshift " + str(lc_zs[i]) + "..."
 
-    for i in range(len(redshifts2)):
-        print "Doing redshift " + str(redshifts2[i]) + "..."
-
-        f = open('../generate_data/data_'+flag1+'/map_dbt_'+str('%.3f' % redshifts2[i])+'.bin','rb')
+        f = open('../generate_data/data_'+flag1+'/smooth_coevalmap_dbt_'+str('%.3f' % lc_zs[i])+'.bin','rb')
         data1=np.load(f)
         data1= data1.flatten()
-        f = open('../generate_data/data_'+flag2+'/map_dbt_'+str('%.3f' % redshifts2[i])+'.bin','rb')
+        f = open('../generate_data/data_'+flag2+'/smooth_coevalmap_dbt_'+str('%.3f' % lc_zs[i])+'.bin','rb')
         data2=np.load(f)
         data2 = data2.flatten()
         print "Generating histogram for "+ str(len(data2)) + "and "+ str(len(data1))+" points"
@@ -1041,15 +1076,15 @@ def plot_dbt_histogram():
         #ax.set_yscale('log',basey=10)
         weights1 = np.ones_like(data1)/float(len(data1))
         weights2 = np.ones_like(data2)/float(len(data2))
-        ax.hist(data1,weights=weights1,bins=500,histtype='stepfilled',color='blue',edgecolor='none',alpha=0.5,label='Stellar Only')
-        ax.hist(data2,weights=weights2,bins=500,histtype='stepfilled',color='red',edgecolor='none',alpha=0.5,label='X-ray & Stellar')
-        plt.legend(loc=2)
-        plt.xlabel("$\delta T_b$ [mK]",size=30)
-        #plt.ylim(0,0.01)
-        plt.xlim(-1000,100)
-        plt.ylabel("Probability",size=30)
+        ax.hist(data1,weights=weights1,bins=250,histtype='stepfilled',color='blue',edgecolor='none',alpha=0.5,label='Stellar Only')
+        ax.hist(data2,weights=weights2,bins=250,histtype='stepfilled',color='red',edgecolor='none',alpha=0.5,label='X-ray & Stellar')
+        plt.legend(loc=2,prop={'size':24})
+        plt.xlabel("$\delta T_b$ [mK]",size=24)
+        plt.ylim(0,0.03)
+        plt.xlim(-280,50)
+        plt.ylabel("Probability",size=24)
         plt.tight_layout()
-        plt.savefig("compare_"+flag1+'_'+flag2+'/lin_dbt_hist_'+str('%.3f' % redshifts2[i])+'.png')
+        plt.savefig("compare_"+flag1+'_'+flag2+'/lin_dbt_hist_'+str('%.3f' % lc_zs[i])+'.png')
         plt.close()
         print "histogram complete"
 
@@ -1058,19 +1093,21 @@ def plot_dbt_histogram():
 
 #
 #compare_dbtmaps()
-compare_dbtmaps('smoothed')
+#compare_dbtmaps('smoothed')
 #compare_xfracmaps('')
 #compare_xfracmaps('He1')
-#compare_xfracmaps('He2')
+compare_xfracmaps('He2')
 #compare_tempmaps()
-###
+####
 #compare_mean_xfrac()
 #compare_mean_dbt()
 #compare_mean_temp()
 #compare_rms()
-##
+###
 #compare_hisograms_temperature()
 #compare_xfrac_lightcones()
+#compare_xfrac_lightcones("He1")
+#compare_xfrac_lightcones("He2")
 #compare_temp_lightcones()
 #compare_dbt_lightcones()
 #compare_ps()
@@ -1078,3 +1115,5 @@ compare_dbtmaps('smoothed')
 #compare_ps('xfrac_')
 #compare_ps('xfrac_He1')
 #compare_ps('xfrac_He2')
+
+#highT_ps()
