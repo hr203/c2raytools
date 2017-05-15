@@ -4,30 +4,33 @@ import numpy
 
 
 #FLAG = 'wpls' #for power laws only
-FLAG = 'wquasars'  #for quasars only
 #FLAG = 'wquasars_wpls' #for both
+#FLAG = 'wquasars_0.8'
+FLAG = 'wquasars_1.6'
 
 #sims redone on apollo#FLAG = 'wstars' #for neither
 #FLAG = 'wstars'
 #FLAG = 'wstars_equalphotons' #for neither
-#FLAG = 'compare_wstars_wpls'
 
 #tests
 #FLAG = 'kylsim'
 #FLAG = 'test'
-#res=200
+#res=30
 #steps = 2
-
-
 
 if FLAG!='test':
     results_dir= 'data_'+FLAG+'/'
     plots_dir = 'plots_'+FLAG+'/'
-    basepath = '/lustre/scratch/astro/hr203/RESULTS/244Mpc_f2_8.2S_H250_'+FLAG+'/' 
+    basepath ='/lustre/scratch/astro/hr203/RESULTS/244Mpc_f2_8.2S_H250_'+FLAG+'_2/' 
 else:
-    results_dir='tests/data_'+str(res)+'/'
-    plots_dir='tests/data_'+str(res)+'/'
-    basepath = '/lustre/scratch/astro/hr203/RESULTS/tests/'+str(res)+'_box/'
+    results_dir='tests/data_'+str(res)+'_2source/'
+    plots_dir='tests/data_'+str(res)+'_2source/'
+    basepath = '/lustre/scratch/astro/hr203/RESULTS/tests/'+str(res)+'_xbox_1.6/'
+
+
+def get_flag():
+    return FLAG
+
 
 def get_res():
     if FLAG=='test':

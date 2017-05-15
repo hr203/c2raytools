@@ -15,13 +15,13 @@ import matplotlib.pyplot as plt
 mesh=250
 
 def writedata(data,filename):
-    file = open(filename,'w')
+    file = open('../generate_data/'+setup_dirs.resultsdir()+filename,'w')
     for it in range(len(data)):
         if str(data[it])!='nan':
             file.write(str(data[it])+'\n')
         else:
             print "deleted nan bin"
-    print "Written to " + str(filename)
+    print "Written to " + str('../generate_data/'+setup_dirs.resultsdir()+filename)
 
 #def writebin(data,filename):
 #    file = open(filename,'wb')
@@ -72,21 +72,22 @@ def readbin(filename):
     return np.load(f)
         
 
-def readoned(name):
-    file = open('../generate_data/'+setup_dirs.resultsdir()+name+'.dat','r')
+def readoned(name,path='../generate_data/'+setup_dirs.resultsdir()):
+#    print "opening "+path+name
+    file = open(path+name+'.dat','r')
     cnt=0
     for line in file:
         cnt = cnt+1
     data=np.zeros(cnt)
     file.close()
-    file = open('../generate_data/'+setup_dirs.resultsdir()+name+'.dat','r')
-    c=-1
+    file = open(path+name+'.dat','r')
+    c=0
     for line in file:
         if (c!=-1):
             data[c] = float(line)
         c=c+1
     file.close()
-    print 'read data from ../generate_data/'+setup_dirs.resultsdir()+name+'.dat'
+    #print 'read data from '+path+name+'.dat'
     return data
 
 
